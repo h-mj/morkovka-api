@@ -36,12 +36,12 @@ router.post(
 );
 
 router.get("/", (request, response, next) => {
-  User.get({ id: 1 }, (error, rows) => {
+  User.get({ id: 1 }, (error, reply) => {
     if (error) {
       return response.sendStatus(500);
     }
 
-    return response.status(200).json({ data: rows });
+    return response.status(200).json({ data: reply.rows });
   });
 });
 

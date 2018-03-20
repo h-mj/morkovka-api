@@ -11,7 +11,7 @@ const pool = new Pool({
 module.exports = {
   query: (query, parameters, callback) => {
     return pool.query(query, parameters, (error, response) => {
-      callback(error, response.rows, response);
+      callback(error, response);
     });
   }
 };
