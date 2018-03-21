@@ -1,5 +1,8 @@
 const router = require("express").Router();
+const { hash, compare } = require("bcryptjs");
 const { check, validationResult } = require("express-validator/check");
+const { QueryResultError } = require("pg-promise").errors;
+
 const User = require("../models/User");
 
 router.post(
@@ -10,6 +13,8 @@ router.post(
       .isLength({ min: 1 }),
 
     check("sex").isIn(["f", "m"]),
+
+    check("date_of_birth").exists(),
 
     check("email")
       .isEmail()
@@ -22,27 +27,81 @@ router.post(
     const errors = validationResult(request);
 
     if (!errors.isEmpty()) {
-      return response.sendStatus(422);
+      return response.error(422, "Unprocessable Entity");
     }
 
-    User.create(request.body, error => {
-      if (error) {
-        return response.sendStatus(500);
-      }
+    const { name, sex, date_of_birth, email, password } = request.body;
 
-      return response.sendStatus(200);
-    });
+    User.emailExists(email)
+      .then(data => {
+        if (data.exists) {
+          return response.error(409, "Conflict");
+        }
+
+        return hash(password, 8)
+          .then(hash => {
+            return User.create(name, sex, date_of_birth, email, hash);
+          })
+          .then(data => {
+            return response.send();
+          });
+      })
+      .catch(error => {
+        console.error(error);
+        response.error(500, "Internal Server Error");
+      });
+  }
+);
+
+router.post(
+  "/token",
+  [check("email").trim(), check("password").exists()],
+  (request, response, next) => {
+    const errors = validationResult(request);
+
+    if (!errors.isEmpty()) {
+      return response.error(422, "Unprocessable Entity");
+    }
+
+    const { email, password } = request.body;
+
+    User.getHash(email)
+      .then(row => {
+        return compare(password, row.hash).then(result => {
+          if (!result) {
+            return response.error(400, "Bad Request");
+          }
+
+          return User.createJwt(email).then(result => {
+            response.json(result);
+          });
+        });
+      })
+      .catch(error => {
+        console.log(error);
+
+        if (error instanceof QueryResultError) {
+          response.error(400, "Bad Request");
+        } else {
+          response.error(500, "Internal Server Error");
+        }
+      });
   }
 );
 
 router.get("/", (request, response, next) => {
-  User.get({ id: 1 }, (error, reply) => {
-    if (error) {
-      return response.sendStatus(500);
-    }
+  if (!request.user) {
+    return response.error(401, "Unauthorized");
+  }
 
-    return response.status(200).json({ data: reply.rows });
-  });
+  User.get(request.user.id)
+    .then(data => {
+      response.json({ data });
+    })
+    .catch(error => {
+      console.error(error);
+      response.error(500, "Internal Server Error");
+    });
 });
 
 module.exports = router;

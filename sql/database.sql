@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-03-21 01:38:36
+-- Started on 2018-03-21 13:10:28
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -39,7 +39,7 @@ ALTER FUNCTION public.create_foodstuff(character varying, character, real, real,
 CREATE FUNCTION public.create_user(character varying, character, date, character varying, character) RETURNS void
     LANGUAGE plpgsql
     AS $_$begin
-	insert into users (name, sex, date_of_birth, email, password) values ($1, $2, $3, $4, $5);
+	insert into users (name, sex, date_of_birth, email, hash) values ($1, $2, $3, $4, $5);
 end;$_$;
 
 
@@ -162,7 +162,7 @@ CREATE TABLE public.users (
     sex character(1) NOT NULL,
     date_of_birth date NOT NULL,
     email character varying(64) NOT NULL,
-    password character(60) NOT NULL,
+    hash character(60) NOT NULL,
     type smallint DEFAULT 0 NOT NULL
 );
 
@@ -316,7 +316,7 @@ ALTER TABLE ONLY public.meals
     ADD CONSTRAINT meals_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2018-03-21 01:38:36
+-- Completed on 2018-03-21 13:10:28
 
 --
 -- PostgreSQL database dump complete
