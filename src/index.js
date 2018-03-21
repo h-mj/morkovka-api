@@ -3,7 +3,8 @@ const bodyParser = require("body-parser");
 const jwt = require("express-jwt");
 const { secret } = require("./config");
 
-const usersRoute = require("./routes/user");
+const userRoute = require("./routes/user");
+const mealRoute = require("./routes/meal");
 
 const server = express();
 
@@ -21,10 +22,11 @@ server.use((request, response, next) => {
   next();
 });
 
-server.use("/user", usersRoute);
+server.use(userRoute);
+server.use(mealRoute);
 
 server.use((request, response, next) => {
-  response.sendStatus(404);
+  response.error(404, "Not Found");
 });
 
 server.listen(3001);

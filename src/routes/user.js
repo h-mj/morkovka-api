@@ -5,8 +5,23 @@ const { QueryResultError } = require("pg-promise").errors;
 
 const User = require("../models/User");
 
+router.get("/user", (request, response, next) => {
+  if (!request.user) {
+    return response.error(401, "Unauthorized");
+  }
+
+  User.get(request.user.id)
+    .then(data => {
+      response.json({ data });
+    })
+    .catch(error => {
+      console.error(error);
+      response.error(500, "Internal Server Error");
+    });
+});
+
 router.post(
-  "/",
+  "/user",
   [
     check("name")
       .trim()
@@ -32,7 +47,7 @@ router.post(
 
     const { name, sex, date_of_birth, email, password } = request.body;
 
-    User.emailExists(email)
+    User.exists(email)
       .then(data => {
         if (data.exists) {
           return response.error(409, "Conflict");
@@ -54,7 +69,7 @@ router.post(
 );
 
 router.post(
-  "/token",
+  "/user/token",
   [check("email").trim(), check("password").exists()],
   (request, response, next) => {
     const errors = validationResult(request);
@@ -78,30 +93,14 @@ router.post(
         });
       })
       .catch(error => {
-        console.log(error);
-
         if (error instanceof QueryResultError) {
           response.error(400, "Bad Request");
         } else {
+          console.log(error);
           response.error(500, "Internal Server Error");
         }
       });
   }
 );
-
-router.get("/", (request, response, next) => {
-  if (!request.user) {
-    return response.error(401, "Unauthorized");
-  }
-
-  User.get(request.user.id)
-    .then(data => {
-      response.json({ data });
-    })
-    .catch(error => {
-      console.error(error);
-      response.error(500, "Internal Server Error");
-    });
-});
 
 module.exports = router;
