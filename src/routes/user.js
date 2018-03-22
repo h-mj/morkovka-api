@@ -42,7 +42,9 @@ router.post(
     const errors = validationResult(request);
 
     if (!errors.isEmpty()) {
-      return response.error(422, "Unprocessable Entity");
+      return response.error(422, "Unprocessable Entity", {
+        invalid: Object.keys(errors.mapped())
+      });
     }
 
     const { name, sex, date_of_birth, email, password } = request.body;
@@ -70,12 +72,19 @@ router.post(
 
 router.post(
   "/user/token",
-  [check("email").trim(), check("password").exists()],
+  [
+    check("email")
+      .trim()
+      .isLength({ min: 1 }),
+    check("password").isLength({ min: 1 })
+  ],
   (request, response, next) => {
     const errors = validationResult(request);
 
     if (!errors.isEmpty()) {
-      return response.error(422, "Unprocessable Entity");
+      return response.error(422, "Unprocessable Entity", {
+        invalid: Object.keys(errors.mapped())
+      });
     }
 
     const { email, password } = request.body;
@@ -87,8 +96,8 @@ router.post(
             return response.error(400, "Bad Request");
           }
 
-          return User.createJwt(email).then(result => {
-            response.json(result);
+          return User.createJwt(email).then(data => {
+            response.json({ data });
           });
         });
       })

@@ -11,11 +11,8 @@ const exists = (name, date, user_id) => {
   );
 };
 
-const getAll = (user_id, date) => {
-  return any(
-    "select * from meals where meals.user_id = $1 and meals.date = $2;",
-    [user_id, date]
-  );
+const getAll = (date, user_id) => {
+  return any("select * from get_meals($1, $2);", [date, user_id]);
 };
 
 module.exports = {

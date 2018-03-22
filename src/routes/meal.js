@@ -11,13 +11,15 @@ router.get("/meals", [check("date").exists()], (request, response, next) => {
   const errors = validationResult(request);
 
   if (!errors.isEmpty()) {
-    return response.error(422, "Unprocessable Entity");
+    return response.error(422, "Unprocessable Entity", {
+      invalid: Object.keys(errors.mapped())
+    });
   }
 
   const { id } = request.user;
   const { date } = request.query;
 
-  Meal.getAll(id, date)
+  Meal.getAll(date, id)
     .then(data => {
       response.json({ data });
     })
@@ -44,7 +46,9 @@ router.post(
     const errors = validationResult(request);
 
     if (!errors.isEmpty()) {
-      return response.error(422, "Unprocessable Entity");
+      return response.error(422, "Unprocessable Entity", {
+        invalid: Object.keys(errors.mapped())
+      });
     }
 
     const { id } = request.user;

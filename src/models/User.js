@@ -14,17 +14,17 @@ const create = (name, sex, date_of_birth, email, hash) => {
 
 const exists = email => {
   return one(
-    "select exists(select * from v_user where email = $1) as exists;",
+    "select exists(select * from v_users where email = $1) as exists;",
     email
   );
 };
 
 const get = id => {
-  return one("select * from v_user where id = $1;", id);
+  return one("select * from v_users where id = $1;", id);
 };
 
 const getBy = (by, value) => {
-  return one("select * from v_user where $1:name = $2;", [by, value]);
+  return one("select * from v_users where $1:name = $2;", [by, value]);
 };
 
 const getHash = email => {

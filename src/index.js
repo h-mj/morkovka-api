@@ -13,10 +13,8 @@ server.use(bodyParser.json());
 server.use(jwt({ secret, credentialsRequired: false }));
 
 server.use((request, response, next) => {
-  response.error = (code, message, description) => {
-    return response
-      .status(code)
-      .json({ error: { code, message, description } });
+  response.error = (code, message, details) => {
+    return response.status(code).json({ error: { code, message, details } });
   };
 
   next();
