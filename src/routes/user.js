@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { hash, compare } = require("bcryptjs");
 const { check, validationResult } = require("express-validator/check");
+const { sanitize } = require("express-validator/filter");
 const { QueryResultError } = require("pg-promise").errors;
 
 const User = require("../models/User");
@@ -29,14 +30,15 @@ router.post(
 
     check("sex").isIn(["f", "m"]),
 
-    check("date_of_birth").exists(),
+    check("date_of_birth").isBefore(),
 
     check("email")
-      .isEmail()
       .trim()
-      .normalizeEmail(),
+      .isEmail(),
 
-    check("password").isLength({ min: 8 })
+    check("password").isLength({ min: 8 }),
+
+    sanitize("email").normalizeEmail()
   ],
   (request, response, next) => {
     const errors = validationResult(request);
@@ -56,12 +58,9 @@ router.post(
         }
 
         return hash(password, 8)
-          .then(hash => {
-            return User.create(name, sex, date_of_birth, email, hash);
-          })
-          .then(data => {
-            return response.send();
-          });
+          .then(hash => User.create(name, sex, date_of_birth, email, hash))
+          .then(data => User.createJwt(email))
+          .then(data => response.json({ data }));
       })
       .catch(error => {
         console.error(error);
@@ -75,10 +74,11 @@ router.post(
   [
     check("email")
       .trim()
-      .normalizeEmail()
       .isLength({ min: 1 }),
 
-    check("password").isLength({ min: 1 })
+    check("password").isLength({ min: 1 }),
+
+    sanitize("email").normalizeEmail()
   ],
   (request, response, next) => {
     const errors = validationResult(request);
