@@ -75,7 +75,9 @@ router.post(
   [
     check("email")
       .trim()
+      .normalizeEmail()
       .isLength({ min: 1 }),
+
     check("password").isLength({ min: 1 })
   ],
   (request, response, next) => {
