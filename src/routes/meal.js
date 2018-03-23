@@ -1,15 +1,14 @@
 const router = require("express").Router();
 const { check, validationResult } = require("express-validator/check");
-const { QueryResultError } = require("pg-promise").errors;
 const { auth, validate } = require("../utils/authValidate");
 
 const Meal = require("../models/Meal");
 
 router.get(
   "/meals",
-  [check("date").isBefore(), validate],
   auth,
-  (request, response, next) => {
+  [check("date").isBefore(), validate],
+  (request, response) => {
     const { id } = request.user;
     const { date } = request.query;
 
@@ -24,6 +23,7 @@ router.get(
 
 router.post(
   "/meal",
+  auth,
   [
     check("name")
       .trim()
@@ -33,14 +33,18 @@ router.post(
 
     validate
   ],
-  auth,
-  (request, response, next) => {
+  (request, response) => {
     const { id } = request.user;
     const { name, date } = request.body;
 
-    Meal.notExists(name, date, id)
-      .then(data => Meal.create(name, date, id))
-      .then(data => response.send())
+    Meal.exists(name, id, date)
+      .then(data => {
+        if (data) {
+          return response.error(409, "Conflict");
+        }
+
+        return Meal.add(name, id, date).then(data => response.json({ data }));
+      })
       .catch(error => {
         console.log(error);
         response.error(500, "Internal Server Error");
@@ -50,27 +54,30 @@ router.post(
 
 router.post(
   "/meal/food",
+  auth,
   [
     check("foodstuff_id").isNumeric(),
     check("meal_id").isNumeric(),
-    check("quantity").isNumeric(),
+    check("quantity").isFloat({ gt: 0 }),
     validate
   ],
-  auth,
-  (request, response, next) => {
+  (request, response) => {
     const { id } = request.user;
     const { foodstuff_id, meal_id, quantity } = request.body;
 
     Meal.isOwner(meal_id, id)
-      .then(data => Meal.addFood(meal_id, foodstuff_id, quantity))
-      .then(data => response.json({ data }))
-      .catch(error => {
-        if (error instanceof QueryResultError) {
-          response.error(400, "Bad Request");
-        } else {
-          console.log(error);
-          response.error(500, "Internal Server Error");
+      .then(data => {
+        if (!data) {
+          return response.error(400, "Bad Request");
         }
+
+        return Meal.addFood(meal_id, foodstuff_id, quantity).then(data =>
+          response.json({ data })
+        );
+      })
+      .catch(error => {
+        console.log(error);
+        response.error(500, "Internal Server Error");
       });
   }
 );

@@ -8,7 +8,6 @@ const mealRoute = require("./routes/meal");
 
 const server = express();
 
-server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());
 server.use(jwt({ secret, credentialsRequired: false }));
 

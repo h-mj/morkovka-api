@@ -1,4 +1,4 @@
-const { none, one, any } = require("../database");
+const { one, oneOrNone } = require("../database");
 
 module.exports = {
   getBy: (column, value) => {
@@ -19,9 +19,12 @@ module.exports = {
   },
 
   getHashByEmail: email => {
-    return one("SELECT hash FROM users_t WHERE email = ${email} LIMIT 1;", {
-      email
-    });
+    return oneOrNone(
+      "SELECT hash FROM users_t WHERE email = ${email} LIMIT 1;",
+      {
+        email
+      }
+    );
   },
 
   add: (name, sex, date_of_birth, email, hash) => {
@@ -30,8 +33,8 @@ module.exports = {
     });
   },
 
-  notExistsByEmail: email => {
-    return none("SELECT 1 FROM users_t WHERE email = ${email} LIMIT 1;", {
+  existsByEmail: email => {
+    return oneOrNone("SELECT 1 FROM users_t WHERE email = ${email} LIMIT 1;", {
       email
     });
   }

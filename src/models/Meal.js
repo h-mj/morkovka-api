@@ -1,4 +1,4 @@
-const { none, one, any } = require("../database");
+const { one, any, oneOrNone } = require("../database");
 
 module.exports = {
   getAll: (user_id, date) => {
@@ -9,15 +9,15 @@ module.exports = {
   },
 
   add: (name, user_id, date) => {
-    return one("select add_meal_f(${name}, ${user_id}, ${date});", {
+    return one("SELECT * FROM add_meal_f(${name}, ${user_id}, ${date});", {
       name,
       user_id,
       date
     });
   },
 
-  notExists: (name, user_id, date) => {
-    return none(
+  exists: (name, user_id, date) => {
+    return oneOrNone(
       "SELECT 1 FROM meals_t WHERE name = ${name} AND user_id = ${user_id} AND date = ${date} LIMIT 1;",
       { name, user_id, date }
     );
