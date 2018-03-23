@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-03-23 12:07:14
+-- Started on 2018-03-23 17:55:45
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -16,23 +16,6 @@ SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
-
---
--- TOC entry 1 (class 3079 OID 12924)
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- TOC entry 2846 (class 0 OID 0)
--- Dependencies: 1
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
 
 --
 -- TOC entry 217 (class 1255 OID 16754)
@@ -163,6 +146,27 @@ $$;
 ALTER FUNCTION public.add_user_f(name_a character varying, sex_a character, date_of_birth_a date, email_a character varying, hash_a character) OWNER TO postgres;
 
 --
+-- TOC entry 220 (class 1255 OID 16758)
+-- Name: find_foodstuffs_f(character varying); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.find_foodstuffs_f(query_a character varying) RETURNS TABLE(id integer, unit character, name character varying, calories real, carbs real, proteins real, fats real)
+    LANGUAGE plpgsql
+    AS $$BEGIN
+	RETURN QUERY
+	SELECT
+		*
+	FROM
+		foodstuffs_t
+	WHERE
+		lower(foodstuffs_t.name) LIKE '%' || lower(query_a) || '%';
+END;
+$$;
+
+
+ALTER FUNCTION public.find_foodstuffs_f(query_a character varying) OWNER TO postgres;
+
+--
 -- TOC entry 208 (class 1255 OID 16682)
 -- Name: get_meal_f(integer, date); Type: FUNCTION; Schema: public; Owner: postgres
 --
@@ -249,7 +253,7 @@ CREATE SEQUENCE public.foodstuff_t_id_seq
 ALTER TABLE public.foodstuff_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2847 (class 0 OID 0)
+-- TOC entry 2846 (class 0 OID 0)
 -- Dependencies: 199
 -- Name: foodstuff_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -289,7 +293,7 @@ CREATE SEQUENCE public.meals_t_id_seq
 ALTER TABLE public.meals_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2848 (class 0 OID 0)
+-- TOC entry 2847 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: meals_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -332,7 +336,7 @@ CREATE SEQUENCE public.users_t_id_seq
 ALTER TABLE public.users_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2849 (class 0 OID 0)
+-- TOC entry 2848 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: users_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -357,7 +361,7 @@ CREATE VIEW public.users_v AS
 ALTER TABLE public.users_v OWNER TO postgres;
 
 --
--- TOC entry 2698 (class 2604 OID 16627)
+-- TOC entry 2699 (class 2604 OID 16627)
 -- Name: foodstuffs_t id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -365,7 +369,7 @@ ALTER TABLE ONLY public.foodstuffs_t ALTER COLUMN id SET DEFAULT nextval('public
 
 
 --
--- TOC entry 2699 (class 2604 OID 16654)
+-- TOC entry 2700 (class 2604 OID 16654)
 -- Name: meals_t id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -373,7 +377,7 @@ ALTER TABLE ONLY public.meals_t ALTER COLUMN id SET DEFAULT nextval('public.meal
 
 
 --
--- TOC entry 2695 (class 2604 OID 16607)
+-- TOC entry 2696 (class 2604 OID 16607)
 -- Name: users_t id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
@@ -381,7 +385,7 @@ ALTER TABLE ONLY public.users_t ALTER COLUMN id SET DEFAULT nextval('public.user
 
 
 --
--- TOC entry 2713 (class 2606 OID 16741)
+-- TOC entry 2714 (class 2606 OID 16741)
 -- Name: foods_t foods_t_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -390,7 +394,7 @@ ALTER TABLE ONLY public.foods_t
 
 
 --
--- TOC entry 2705 (class 2606 OID 16629)
+-- TOC entry 2706 (class 2606 OID 16629)
 -- Name: foodstuffs_t foodstuff_t_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -399,7 +403,7 @@ ALTER TABLE ONLY public.foodstuffs_t
 
 
 --
--- TOC entry 2707 (class 2606 OID 16631)
+-- TOC entry 2708 (class 2606 OID 16631)
 -- Name: foodstuffs_t foodstuff_t_unit_name_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -408,7 +412,7 @@ ALTER TABLE ONLY public.foodstuffs_t
 
 
 --
--- TOC entry 2709 (class 2606 OID 16658)
+-- TOC entry 2710 (class 2606 OID 16658)
 -- Name: meals_t meals_t_name_user_id_date_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -417,7 +421,7 @@ ALTER TABLE ONLY public.meals_t
 
 
 --
--- TOC entry 2711 (class 2606 OID 16656)
+-- TOC entry 2712 (class 2606 OID 16656)
 -- Name: meals_t meals_t_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -426,7 +430,7 @@ ALTER TABLE ONLY public.meals_t
 
 
 --
--- TOC entry 2701 (class 2606 OID 16612)
+-- TOC entry 2702 (class 2606 OID 16612)
 -- Name: users_t users_t_email_key; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -435,7 +439,7 @@ ALTER TABLE ONLY public.users_t
 
 
 --
--- TOC entry 2703 (class 2606 OID 16610)
+-- TOC entry 2704 (class 2606 OID 16610)
 -- Name: users_t users_t_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -444,7 +448,7 @@ ALTER TABLE ONLY public.users_t
 
 
 --
--- TOC entry 2697 (class 2606 OID 16680)
+-- TOC entry 2698 (class 2606 OID 16680)
 -- Name: users_t users_t_sex_check; Type: CHECK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -453,7 +457,7 @@ ALTER TABLE public.users_t
 
 
 --
--- TOC entry 2715 (class 2606 OID 16742)
+-- TOC entry 2716 (class 2606 OID 16742)
 -- Name: foods_t foods_t_foodstuff_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -462,7 +466,7 @@ ALTER TABLE ONLY public.foods_t
 
 
 --
--- TOC entry 2716 (class 2606 OID 16747)
+-- TOC entry 2717 (class 2606 OID 16747)
 -- Name: foods_t foods_t_meal_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -471,7 +475,7 @@ ALTER TABLE ONLY public.foods_t
 
 
 --
--- TOC entry 2714 (class 2606 OID 16659)
+-- TOC entry 2715 (class 2606 OID 16659)
 -- Name: meals_t meals_t_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -479,7 +483,7 @@ ALTER TABLE ONLY public.meals_t
     ADD CONSTRAINT meals_t_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2018-03-23 12:07:14
+-- Completed on 2018-03-23 17:55:45
 
 --
 -- PostgreSQL database dump complete
