@@ -1,17 +1,20 @@
 const router = require("express").Router();
+const jwt = require("jsonwebtoken");
+const { secret } = require("../config");
 const { hash, compare } = require("bcryptjs");
-const { check, validationResult } = require("express-validator/check");
+const { check } = require("express-validator/check");
 const { sanitize } = require("express-validator/filter");
 const { QueryResultError } = require("pg-promise").errors;
+const { auth, validate } = require("../utils/authValidate");
 
 const User = require("../models/User");
 
-router.get("/user", (request, response, next) => {
-  if (!request.user) {
-    return response.error(401, "Unauthorized");
-  }
+const createToken = data => {
+  return jwt.sign({ id: data.id }, secret, { expiresIn: "2 days" });
+};
 
-  User.get(request.user.id)
+router.get("/user", auth, (request, response, next) => {
+  User.get("id", request.user.id)
     .then(data => {
       response.json({ data });
     })
@@ -38,33 +41,25 @@ router.post(
 
     check("password").isLength({ min: 8 }),
 
-    sanitize("email").normalizeEmail()
+    sanitize("email").normalizeEmail(),
+
+    validate
   ],
   (request, response, next) => {
-    const errors = validationResult(request);
-
-    if (!errors.isEmpty()) {
-      return response.error(422, "Unprocessable Entity", {
-        invalid: Object.keys(errors.mapped())
-      });
-    }
-
     const { name, sex, date_of_birth, email, password } = request.body;
 
-    User.exists(email)
-      .then(data => {
-        if (data.exists) {
-          return response.error(409, "Conflict");
-        }
-
-        return hash(password, 8)
-          .then(hash => User.create(name, sex, date_of_birth, email, hash))
-          .then(data => User.createJwt(email))
-          .then(data => response.json({ data }));
-      })
+    User.notExistsByEmail(email)
+      .then(data => hash(password, 8))
+      .then(hash => User.add(name, sex, date_of_birth, email, hash))
+      .then(data => createToken(data))
+      .then(data => response.json({ data }))
       .catch(error => {
-        console.error(error);
-        response.error(500, "Internal Server Error");
+        if (error instanceof QueryResultError) {
+          response.error(409, "Conflict");
+        } else {
+          console.log(error);
+          response.error(500, "Internal Server Error");
+        }
       });
   }
 );
@@ -78,29 +73,23 @@ router.post(
 
     check("password").isLength({ min: 1 }),
 
-    sanitize("email").normalizeEmail()
+    sanitize("email").normalizeEmail(),
+
+    validate
   ],
   (request, response, next) => {
-    const errors = validationResult(request);
-
-    if (!errors.isEmpty()) {
-      return response.error(422, "Unprocessable Entity", {
-        invalid: Object.keys(errors.mapped())
-      });
-    }
-
     const { email, password } = request.body;
 
-    User.getHash(email)
+    User.getHashByEmail(email)
       .then(row => {
         return compare(password, row.hash).then(result => {
           if (!result) {
             return response.error(400, "Bad Request");
           }
 
-          return User.createJwt(email).then(data => {
-            response.json({ data });
-          });
+          return User.getByEmail(email)
+            .then(data => createToken(data))
+            .then(data => response.json({ data }));
         });
       })
       .catch(error => {

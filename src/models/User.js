@@ -1,47 +1,38 @@
-const jwt = require("jsonwebtoken");
-const { secret } = require("../config");
 const { none, one, any } = require("../database");
 
-const create = (name, sex, date_of_birth, email, hash) => {
-  return one("select create_user($1, $2, $3, $4, $5);", [
-    name,
-    sex,
-    date_of_birth,
-    email,
-    hash
-  ]);
-};
-
-const exists = email => {
-  return one(
-    "select exists(select * from v_users where email = $1) as exists;",
-    email
-  );
-};
-
-const get = id => {
-  return one("select * from v_users where id = $1;", id);
-};
-
-const getBy = (by, value) => {
-  return one("select * from v_users where $1:name = $2;", [by, value]);
-};
-
-const getHash = email => {
-  return one("select hash from users where email = $1;", email);
-};
-
-const createJwt = email => {
-  return getBy("email", email).then(data => {
-    return jwt.sign({ id: data.id }, secret, { expiresIn: "2 days" });
-  });
-};
-
 module.exports = {
-  create,
-  exists,
-  get,
-  getBy,
-  getHash,
-  createJwt
+  getBy: (column, value) => {
+    return one("SELECT * FROM users_v WHERE ${column:name} = ${value};", {
+      column,
+      value
+    });
+  },
+
+  getById: id => {
+    return one("SELECT * FROM users_v WHERE id = ${id} LIMIT 1;", { id });
+  },
+
+  getByEmail: email => {
+    return one("SELECT * FROM users_v WHERE email = ${email} LIMIT 1;", {
+      email
+    });
+  },
+
+  getHashByEmail: email => {
+    return one("SELECT hash FROM users_t WHERE email = ${email} LIMIT 1;", {
+      email
+    });
+  },
+
+  add: (name, sex, date_of_birth, email, hash) => {
+    return one("SELECT * FROM add_user_f(${arguments:csv});", {
+      arguments: [name, sex, date_of_birth, email, hash]
+    });
+  },
+
+  notExistsByEmail: email => {
+    return none("SELECT 1 FROM users_t WHERE email = ${email} LIMIT 1;", {
+      email
+    });
+  }
 };
