@@ -3,6 +3,7 @@ const { check, validationResult } = require("express-validator/check");
 const { auth, validate } = require("../utils/authValidate");
 
 const Meal = require("../models/Meal");
+const Food = require("../models/Food");
 
 router.get(
   "/meals",
@@ -74,6 +75,31 @@ router.post(
         return Meal.addFood(meal_id, foodstuff_id, quantity).then(data =>
           response.json({ data })
         );
+      })
+      .catch(error => {
+        console.log(error);
+        response.error(500, "Internal Server Error");
+      });
+  }
+);
+
+router.delete(
+  "/meal/food",
+  auth,
+  [check("food_id").isNumeric(), validate],
+  (request, response) => {
+    const { id } = request.user;
+    const { food_id } = request.body;
+
+    Food.isOwner(food_id, id)
+      .then(data => {
+        if (!data) {
+          return response.error(400, "Bad Request");
+        }
+
+        return Food.delete(food_id).then(data => {
+          response.json({ data: true });
+        });
       })
       .catch(error => {
         console.log(error);

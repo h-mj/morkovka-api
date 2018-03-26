@@ -9,7 +9,7 @@ const { auth, validate } = require("../utils/authValidate");
 const User = require("../models/User");
 
 const createToken = data => {
-  return jwt.sign({ id: data.id }, secret, { expiresIn: "2 days" });
+  return jwt.sign({ id: data.id }, secret, { expiresIn: "7 days" });
 };
 
 router.get("/user", auth, (request, response) => {
