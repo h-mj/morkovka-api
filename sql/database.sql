@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-03-23 20:18:19
+-- Started on 2018-03-27 21:05:02
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -16,6 +16,23 @@ SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- TOC entry 1 (class 3079 OID 12924)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2852 (class 0 OID 0)
+-- Dependencies: 1
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
 
 --
 -- TOC entry 216 (class 1255 OID 16795)
@@ -93,20 +110,30 @@ $$;
 ALTER FUNCTION public.add_food_f(foodstuff_id_a integer, meal_id_a integer, quantity_a real) OWNER TO postgres;
 
 --
--- TOC entry 213 (class 1255 OID 16632)
--- Name: add_foodstuff_f(character, character varying, real, real, real, real); Type: FUNCTION; Schema: public; Owner: postgres
+-- TOC entry 207 (class 1255 OID 16801)
+-- Name: add_foodstuff_f(real, character, character varying, real, real, real, real); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.add_foodstuff_f(unit_a character, name_a character varying, calories_a real, carbs_a real, proteins_a real, fats_a real) RETURNS void
+CREATE FUNCTION public.add_foodstuff_f(quantity_a real, unit_a character, name_a character varying, calories_a real, carbs_a real, proteins_a real, fats_a real) RETURNS TABLE(id integer, unit character, name character varying, calories real, carbs real, proteins real, fats real)
     LANGUAGE plpgsql
-    AS $$
+    AS $$#variable_conflict use_column
 BEGIN
-	INSERT INTO foodstuffs_t VALUES (DEFAULT, unit_a, name_a, calories_a, carbs_a, proteins_a, fats_a);
+	RETURN QUERY
+	INSERT INTO foodstuffs_t VALUES (
+											DEFAULT,
+											unit_a,
+											name_a,
+											ROUND((calories_a / quantity_a)::numeric, 3),
+											ROUND((carbs_a / quantity_a)::numeric, 3),
+											ROUND((proteins_a / quantity_a)::numeric, 3),
+											ROUND((fats_a / quantity_a)::numeric, 3))
+	RETURNING id, unit, name, calories, carbs, proteins, fats;
 END;
+
 $$;
 
 
-ALTER FUNCTION public.add_foodstuff_f(unit_a character, name_a character varying, calories_a real, carbs_a real, proteins_a real, fats_a real) OWNER TO postgres;
+ALTER FUNCTION public.add_foodstuff_f(quantity_a real, unit_a character, name_a character varying, calories_a real, carbs_a real, proteins_a real, fats_a real) OWNER TO postgres;
 
 --
 -- TOC entry 214 (class 1255 OID 16756)
@@ -131,8 +158,7 @@ ALTER FUNCTION public.add_meal_f(name_a character varying, user_id_a integer, da
 
 CREATE FUNCTION public.add_user_f(name_a character varying, sex_a character, date_of_birth_a date, email_a character varying, hash_a character) RETURNS TABLE(id integer, name character varying, sex character, date_of_birth date, email character varying, type smallint)
     LANGUAGE plpgsql
-    AS $$
-#variable_conflict use_column
+    AS $$#variable_conflict use_column
 BEGIN
 	RETURN QUERY
 	INSERT INTO
@@ -169,7 +195,7 @@ $$;
 ALTER FUNCTION public.find_foodstuffs_f(query_a character varying) OWNER TO postgres;
 
 --
--- TOC entry 209 (class 1255 OID 16682)
+-- TOC entry 210 (class 1255 OID 16682)
 -- Name: get_meal_f(integer, date); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -238,7 +264,7 @@ CREATE SEQUENCE public.foods_t_id_seq
 ALTER TABLE public.foods_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2851 (class 0 OID 0)
+-- TOC entry 2853 (class 0 OID 0)
 -- Dependencies: 203
 -- Name: foods_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -281,7 +307,7 @@ CREATE SEQUENCE public.foodstuff_t_id_seq
 ALTER TABLE public.foodstuff_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2852 (class 0 OID 0)
+-- TOC entry 2854 (class 0 OID 0)
 -- Dependencies: 199
 -- Name: foodstuff_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -321,7 +347,7 @@ CREATE SEQUENCE public.meals_t_id_seq
 ALTER TABLE public.meals_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2853 (class 0 OID 0)
+-- TOC entry 2855 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: meals_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -364,7 +390,7 @@ CREATE SEQUENCE public.users_t_id_seq
 ALTER TABLE public.users_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2854 (class 0 OID 0)
+-- TOC entry 2856 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: users_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -528,7 +554,7 @@ ALTER TABLE ONLY public.meals_t
     ADD CONSTRAINT meals_t_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2018-03-23 20:18:19
+-- Completed on 2018-03-27 21:05:02
 
 --
 -- PostgreSQL database dump complete
