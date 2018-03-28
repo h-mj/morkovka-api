@@ -5,7 +5,8 @@ const { secret } = require("./config");
 
 const userRoute = require("./routes/user");
 const mealRoute = require("./routes/meal");
-const foodstuffRouter = require("./routes/foodstuff");
+const foodstuffRoute = require("./routes/foodstuff");
+const quantityRoute = require("./routes/quantity");
 
 const server = express();
 
@@ -31,7 +32,8 @@ server.use((error, request, response, next) => {
 
 server.use(userRoute);
 server.use(mealRoute);
-server.use(foodstuffRouter);
+server.use(foodstuffRoute);
+server.use(quantityRoute);
 
 server.use((request, response, next) => {
   return response.error(404, "Not Found");

@@ -8,18 +8,18 @@ module.exports = {
     });
   },
 
-  add: (name, user_id, date) => {
-    return one("SELECT * FROM add_meal_f(${name}, ${user_id}, ${date});", {
-      name,
+  add: (type, user_id, date) => {
+    return one("SELECT * FROM add_meal_f(${type}::smallint, ${user_id}, ${date});", {
+      type,
       user_id,
       date
     });
   },
 
-  exists: (name, user_id, date) => {
+  exists: (type, user_id, date) => {
     return oneOrNone(
-      "SELECT 1 FROM meals_t WHERE name = ${name} AND user_id = ${user_id} AND date = ${date} LIMIT 1;",
-      { name, user_id, date }
+      "SELECT 1 FROM meals_t WHERE type = ${type} AND user_id = ${user_id} AND date = ${date} LIMIT 1;",
+      { type, user_id, date }
     );
   },
 

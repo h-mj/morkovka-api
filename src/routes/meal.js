@@ -25,26 +25,18 @@ router.get(
 router.post(
   "/meal",
   auth,
-  [
-    check("name")
-      .trim()
-      .isLength({ min: 1 }),
-
-    check("date").exists(),
-
-    validate
-  ],
+  [check("type").isInt({ min: 0, max: 3 }), check("date").exists(), validate],
   (request, response) => {
     const { id } = request.user;
-    const { name, date } = request.body;
+    const { type, date } = request.body;
 
-    Meal.exists(name, id, date)
+    Meal.exists(type, id, date)
       .then(data => {
         if (data) {
           return response.error(409, "Conflict");
         }
 
-        return Meal.add(name, id, date).then(data => response.json({ data }));
+        return Meal.add(type, id, date).then(data => response.json({ data }));
       })
       .catch(error => {
         console.log(error);
