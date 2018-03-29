@@ -9,11 +9,14 @@ module.exports = {
   },
 
   add: (type, user_id, date) => {
-    return one("SELECT * FROM add_meal_f(${type}::smallint, ${user_id}, ${date});", {
-      type,
-      user_id,
-      date
-    });
+    return one(
+      "SELECT * FROM add_meal_f(${type}::smallint, ${user_id}, ${date});",
+      {
+        type,
+        user_id,
+        date
+      }
+    );
   },
 
   exists: (type, user_id, date) => {
@@ -31,7 +34,7 @@ module.exports = {
   },
 
   isOwner: (id, user_id) => {
-    return one(
+    return oneOrNone(
       "SELECT 1 FROM meals_t WHERE id = ${id} AND user_id = ${user_id} LIMIT 1;",
       { id, user_id }
     );

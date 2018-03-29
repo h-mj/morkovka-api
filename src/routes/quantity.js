@@ -17,4 +17,29 @@ router.get("/quantities", auth, (request, response) => {
     });
 });
 
+router.post(
+  "/quantity",
+  auth,
+  [check("quantity_id").isInt({ min: 0 }), check("value").isFloat(), validate],
+  (request, response) => {
+    const { id } = request.user;
+    const { quantity_id, value } = request.body;
+
+    Quantity.isOwner(quantity_id, id)
+      .then(data => {
+        if (!data) {
+          return response.error(400, "Bad Request");
+        }
+
+        return Quantity.addMeasurement(quantity_id, value).then(data => {
+          return response.json({ data });
+        });
+      })
+      .catch(error => {
+        console.log(error);
+        response.error(500, "Internal Server Error");
+      });
+  }
+);
+
 module.exports = router;
