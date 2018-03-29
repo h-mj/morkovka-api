@@ -46,9 +46,23 @@ router.post(
       fats
     } = request.body;
 
-    Foodstuff.add(quantity, unit, name, calories, carbs, proteins, fats)
+    Foodstuff.exists(unit, name)
       .then(data => {
-        response.json({ data });
+        if (data) {
+          return response.error(409, "Conflict");
+        }
+
+        return Foodstuff.add(
+          quantity,
+          unit,
+          name,
+          calories,
+          carbs,
+          proteins,
+          fats
+        ).then(data => {
+          response.json({ data });
+        });
       })
       .catch(error => {
         console.log(error);
