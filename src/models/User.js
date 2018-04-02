@@ -8,8 +8,10 @@ module.exports = {
     });
   },
 
-  getById: id => {
-    return one("SELECT * FROM users_v WHERE id = ${id} LIMIT 1;", { id });
+  getById: user_id => {
+    return one("SELECT * FROM users_v WHERE id = ${user_id} LIMIT 1;", {
+      user_id
+    });
   },
 
   getByEmail: email => {

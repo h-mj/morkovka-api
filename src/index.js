@@ -7,6 +7,7 @@ const userRoute = require("./routes/user");
 const mealRoute = require("./routes/meal");
 const foodstuffRoute = require("./routes/foodstuff");
 const quantityRoute = require("./routes/quantity");
+const statsRoute = require("./routes/stats");
 
 const server = express();
 
@@ -34,6 +35,7 @@ server.use(userRoute);
 server.use(mealRoute);
 server.use(foodstuffRoute);
 server.use(quantityRoute);
+server.use(statsRoute);
 
 server.use((request, response, next) => {
   return response.error(404, "Not Found");

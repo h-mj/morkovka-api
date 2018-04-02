@@ -7,10 +7,10 @@ module.exports = {
     });
   },
 
-  isOwner: (id, user_id) => {
+  isOwner: (quantity_id, user_id) => {
     return oneOrNone(
-      "SELECT 1 FROM quantities_t WHERE id = ${id} AND user_id = ${user_id} LIMIT 1;",
-      { id, user_id }
+      "SELECT 1 FROM quantities_t WHERE id = ${quantity_id} AND user_id = ${user_id} LIMIT 1;",
+      { quantity_id, user_id }
     );
   },
 
@@ -22,11 +22,18 @@ module.exports = {
     });
   },
 
-  addMeasurement: (id, value) => {
-    return one("SELECT * FROM add_measurement_f(${id}, ${value});", {
-      id,
+  addMeasurement: (quantity_id, value) => {
+    return one("SELECT * FROM add_measurement_f(${quantity_id}, ${value});", {
+      quantity_id,
       value
     });
+  },
+
+  getMeasurements: quantity_id => {
+    return any(
+      "SELECT * FROM measurements_t WHERE quantity_id = ${quantity_id} ORDER BY date ASC;",
+      { quantity_id }
+    );
   },
 
   exists: (user_id, name) => {
@@ -36,7 +43,9 @@ module.exports = {
     );
   },
 
-  delete: id => {
-    return none("DELETE FROM quantities_t WHERE id = ${id};", { id });
+  delete: quantity_id => {
+    return none("DELETE FROM quantities_t WHERE id = ${quantity_id};", {
+      quantity_id
+    });
   }
 };

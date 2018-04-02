@@ -26,17 +26,17 @@ module.exports = {
     );
   },
 
-  addFood: (id, foodstuff_id, quantity) => {
+  addFood: (meal_id, foodstuff_id, quantity) => {
     return one(
-      "SELECT * FROM add_food_f(${foodstuff_id}, ${id}, ${quantity});",
-      { foodstuff_id, id, quantity }
+      "SELECT * FROM add_food_f(${foodstuff_id}, ${meal_id}, ${quantity});",
+      { meal_id, foodstuff_id, quantity }
     );
   },
 
-  isOwner: (id, user_id) => {
+  isOwner: (meal_id, user_id) => {
     return oneOrNone(
-      "SELECT 1 FROM meals_t WHERE id = ${id} AND user_id = ${user_id} LIMIT 1;",
-      { id, user_id }
+      "SELECT 1 FROM meals_t WHERE id = ${meal_id} AND user_id = ${user_id} LIMIT 1;",
+      { meal_id, user_id }
     );
   }
 };
