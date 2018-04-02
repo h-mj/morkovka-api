@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-04-02 06:26:03
+-- Started on 2018-04-02 21:11:05
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -253,7 +253,6 @@ ALTER FUNCTION public.find_foodstuffs_f(query_a character varying) OWNER TO post
 CREATE FUNCTION public.get_consumed_data_f(user_id_a integer) RETURNS TABLE(date date, calories real, carbs real, proteins real, fats real)
     LANGUAGE plpgsql
     AS $$
-
 #variable_conflict use_column
 BEGIN
 	RETURN QUERY
@@ -270,7 +269,8 @@ BEGIN
 	ON
 											foods_t.meal_id = meals_t.id
 	WHERE
-											meals_t.user_id = user_id_a
+											meals_t.user_id = user_id_a AND
+											meals_t.date > CURRENT_DATE - INTERVAL '28' DAY
 	GROUP BY
 											meals_t.date
 	ORDER BY
@@ -884,7 +884,7 @@ ALTER TABLE ONLY public.quantities_t
     ADD CONSTRAINT quantities_t_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2018-04-02 06:26:03
+-- Completed on 2018-04-02 21:11:05
 
 --
 -- PostgreSQL database dump complete
