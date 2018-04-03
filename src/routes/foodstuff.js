@@ -1,74 +1,9 @@
 const router = require("express").Router();
-const { check, validationResult } = require("express-validator/check");
-const { auth, validate } = require("../utils/validations");
 
-const Foodstuff = require("../models/Foodstuff");
+const controller = require("../controllers/foodstuff");
+const validator = require("../validators/foodstuff");
 
-router.get(
-  "/foodstuffs",
-  auth,
-  [check("query").isLength({ min: 1 }), validate],
-  (request, response) => {
-    Foodstuff.find(request.query.query)
-      .then(data => {
-        response.json({ data });
-      })
-      .catch(error => {
-        console.log(error);
-        response.error(500, "Internal Server Error");
-      });
-  }
-);
-
-router.post(
-  "/foodstuffs",
-  auth,
-  [
-    check("quantity").isFloat({ gt: 0 }),
-    check("unit").isIn(["g", "tk", "ml"]),
-    check("name")
-      .trim()
-      .isLength({ min: 1 }),
-    check("calories").isFloat({ min: 0 }),
-    check("carbs").isFloat({ min: 0 }),
-    check("proteins").isFloat({ min: 0 }),
-    check("fats").isFloat({ min: 0 }),
-    validate
-  ],
-  (request, response) => {
-    const {
-      quantity,
-      unit,
-      name,
-      calories,
-      carbs,
-      proteins,
-      fats
-    } = request.body;
-
-    Foodstuff.exists(unit, name)
-      .then(data => {
-        if (data) {
-          return response.error(409, "Conflict");
-        }
-
-        return Foodstuff.add(
-          quantity,
-          unit,
-          name,
-          calories,
-          carbs,
-          proteins,
-          fats
-        ).then(data => {
-          response.json({ data });
-        });
-      })
-      .catch(error => {
-        console.log(error);
-        response.error(500, "Internal Server Error");
-      });
-  }
-);
+router.get("/foodstuffs", validator.find, controller.find);
+router.post("/foodstuffs", validator.create, controller.create);
 
 module.exports = router;
