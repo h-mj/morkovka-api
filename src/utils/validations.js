@@ -20,7 +20,16 @@ const validate = (request, response, next) => {
   next();
 };
 
+const trainer = (request, response, next) => {
+  if (request.user.type === 0) {
+    return response.error(403, "Forbidden");
+  }
+
+  next();
+};
+
 module.exports = {
   auth,
-  validate
+  validate,
+  trainer
 };

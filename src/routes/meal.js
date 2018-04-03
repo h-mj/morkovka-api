@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { check, validationResult } = require("express-validator/check");
-const { auth, validate } = require("../utils/authValidate");
+const { auth, validate } = require("../utils/validations");
 
 const Meal = require("../models/Meal");
 const Food = require("../models/Food");

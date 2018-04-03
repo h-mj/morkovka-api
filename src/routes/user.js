@@ -4,16 +4,18 @@ const { secret } = require("../config");
 const { hash, compare } = require("bcryptjs");
 const { check } = require("express-validator/check");
 const { sanitize } = require("express-validator/filter");
-const { auth, validate } = require("../utils/authValidate");
+const { auth, validate, trainer } = require("../utils/validations");
 
 const User = require("../models/User");
 
 const createToken = data => {
-  return jwt.sign({ id: data.id }, secret, { expiresIn: "7 days" });
+  return jwt.sign({ id: data.id, type: data.type }, secret, {
+    expiresIn: "7 days"
+  });
 };
 
 router.get("/user", auth, (request, response) => {
-  User.get("id", request.user.id)
+  User.getBy("id", request.user.id)
     .then(data => {
       response.json({ data });
     })
@@ -103,5 +105,16 @@ router.post(
       });
   }
 );
+
+router.get("/user/clients", auth, trainer, (request, response) => {
+  const { id } = request.user;
+
+  User.getClients(id)
+    .then(data => response.json({ data }))
+    .catch(error => {
+      console.log(error);
+      response.error(500, "Internal Server Error");
+    });
+});
 
 module.exports = router;

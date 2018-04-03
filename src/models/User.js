@@ -1,4 +1,4 @@
-const { one, oneOrNone } = require("../database");
+const { any, one, oneOrNone } = require("../database");
 
 module.exports = {
   getBy: (column, value) => {
@@ -38,6 +38,19 @@ module.exports = {
   existsByEmail: email => {
     return oneOrNone("SELECT 1 FROM users_t WHERE email = ${email} LIMIT 1;", {
       email
+    });
+  },
+
+  isTrainer: user_id => {
+    return oneOrNone(
+      "SELECT 1 FROM users_t WHERE users_t.id = ${user_id} AND user_t.type = 1 LIMIT 1;",
+      { user_id }
+    );
+  },
+
+  getClients: user_id => {
+    return any("SELECT * FROM users_v WHERE users_v.trainer_id = ${user_id};", {
+      user_id
     });
   }
 };
