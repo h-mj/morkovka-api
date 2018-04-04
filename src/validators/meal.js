@@ -1,24 +1,40 @@
-const { check, validationResult } = require("express-validator/check");
-const { auth, validate } = require("../utils/validations");
+const { check } = require("express-validator/check");
+const { auth, validate, hasAccess } = require("./validators");
 
-const get = [auth, check("date").isBefore(), validate];
+const get = [
+  auth,
+  check("user_id").isInt(),
+  check("date").isBefore(),
+  validate,
+  hasAccess
+];
 
 const create = [
   auth,
+  check("user_id").isInt(),
   check("type").isInt({ min: 0, max: 3 }),
-  check("date").exists(),
-  validate
+  check("date").isBefore(),
+  validate,
+  hasAccess
 ];
 
 const add = [
   auth,
-  check("foodstuff_id").isNumeric(),
-  check("meal_id").isNumeric(),
+  check("user_id").isInt(),
+  check("foodstuff_id").isInt(),
+  check("meal_id").isInt(),
   check("quantity").isFloat({ gt: 0 }),
-  validate
+  validate,
+  hasAccess
 ];
 
-const remove = [auth, check("food_id").isNumeric(), validate];
+const remove = [
+  auth,
+  check("user_id").isInt(),
+  check("food_id").isInt(),
+  validate,
+  hasAccess
+];
 
 module.exports = {
   get,

@@ -1,45 +1,36 @@
 const { check } = require("express-validator/check");
 const { sanitize } = require("express-validator/filter");
-const { auth, validate, trainer } = require("../utils/validations");
+const { auth, validate, hasAccess } = require("./validators");
 
-const get = [auth];
+const getMe = [auth];
 
 const create = [
   check("name")
     .trim()
     .isLength({ min: 1 }),
-
   check("sex").isIn(["f", "m"]),
-
   check("date_of_birth").isBefore(),
-
   check("email")
     .trim()
-    .isEmail(),
-
+    .isEmail()
+    .normalizeEmail(),
   check("password").isLength({ min: 8 }),
-
-  sanitize("email").normalizeEmail(),
-
   validate
 ];
 
 const login = [
   check("email")
     .trim()
-    .isLength({ min: 1 }),
-
+    .isLength({ min: 1 })
+    .normalizeEmail(),
   check("password").isLength({ min: 1 }),
-
-  sanitize("email").normalizeEmail(),
-
   validate
 ];
 
-const getClients = [auth, trainer];
+const getClients = [auth, check("user_id").isInt(), validate, hasAccess];
 
 module.exports = {
-  get,
+  getMe,
   create,
   login,
   getClients

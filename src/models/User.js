@@ -41,10 +41,10 @@ module.exports = {
     });
   },
 
-  isTrainer: user_id => {
+  isTrainer: (trainer_id, user_id) => {
     return oneOrNone(
-      "SELECT 1 FROM users_t WHERE users_t.id = ${user_id} AND user_t.type = 1 LIMIT 1;",
-      { user_id }
+      "SELECT 1 FROM users_t WHERE users_t.id = ${user_id} AND users_t.trainer_id = ${trainer_id} LIMIT 1;",
+      { trainer_id, user_id }
     );
   },
 

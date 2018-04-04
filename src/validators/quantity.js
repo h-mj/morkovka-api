@@ -1,35 +1,44 @@
-const { check, validationResult } = require("express-validator/check");
-const { auth, validate } = require("../utils/validations");
+const { check } = require("express-validator/check");
+const { auth, validate, hasAccess } = require("./validators");
 
-const get = [auth];
+const get = [auth, check("user_id").isInt(), validate, hasAccess];
 
 const create = [
   auth,
-
+  check("user_id").isInt(),
   check("name")
     .trim()
     .isLength({ min: 1 }),
-
   check("unit")
     .trim()
     .isLength({ min: 1, max: 16 }),
-
-  validate
+  validate,
+  hasAccess
 ];
 
-const remove = [auth, check("quantity_id").isInt({ min: 0 }), validate];
+const remove = [
+  auth,
+  check("user_id").isInt(),
+  check("quantity_id").isInt(),
+  validate,
+  hasAccess
+];
 
 const getMeasurements = [
   auth,
-  check("quantity_id").isInt({ min: 0 }),
-  validate
+  check("user_id").isInt(),
+  check("quantity_id").isInt(),
+  validate,
+  hasAccess
 ];
 
 const createMeasurement = [
   auth,
-  check("quantity_id").isInt({ min: 0 }),
+  check("user_id").isInt(),
+  check("quantity_id").isInt(),
   check("value").isFloat(),
-  validate
+  validate,
+  hasAccess
 ];
 
 module.exports = {

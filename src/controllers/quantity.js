@@ -1,9 +1,9 @@
 const Quantity = require("../models/Quantity");
 
 function get(request, response) {
-  const { id } = request.user;
+  const { user_id } = request.query;
 
-  Quantity.getAll(id)
+  Quantity.getAll(user_id)
     .then(data => response.json({ data }))
     .catch(error => {
       console.error(error);
@@ -12,16 +12,17 @@ function get(request, response) {
 }
 
 function create(request, response) {
-  const { id } = request.user;
-  const { name, unit } = request.body;
+  const { user_id, name, unit } = request.body;
 
-  Quantity.exists(id, name)
+  Quantity.exists(user_id, name)
     .then(data => {
       if (data) {
         return response.error(409, "Conflict");
       }
 
-      return Quantity.add(id, name, unit).then(data => response.json({ data }));
+      return Quantity.add(user_id, name, unit).then(data =>
+        response.json({ data })
+      );
     })
     .catch(error => {
       console.log(error);
@@ -30,10 +31,9 @@ function create(request, response) {
 }
 
 function remove(request, response) {
-  const { id } = request.user;
-  const { quantity_id } = request.body;
+  const { user_id, quantity_id } = request.body;
 
-  Quantity.isOwner(quantity_id, id)
+  Quantity.isOwner(quantity_id, user_id)
     .then(data => {
       if (!data) {
         return response.error(400, "Bad Request");
@@ -50,10 +50,9 @@ function remove(request, response) {
 }
 
 function getMeasurements(request, response) {
-  const { id } = request.user;
-  const { quantity_id } = request.query;
+  const { user_id, quantity_id } = request.query;
 
-  Quantity.isOwner(quantity_id, id)
+  Quantity.isOwner(quantity_id, user_id)
     .then(data => {
       if (!data) {
         return response.error(400, "Bad Request");
@@ -70,10 +69,9 @@ function getMeasurements(request, response) {
 }
 
 function createMeasurement(request, response) {
-  const { id } = request.user;
-  const { quantity_id, value } = request.body;
+  const { user_id, quantity_id, value } = request.body;
 
-  Quantity.isOwner(quantity_id, id)
+  Quantity.isOwner(quantity_id, user_id)
     .then(data => {
       if (!data) {
         return response.error(400, "Bad Request");

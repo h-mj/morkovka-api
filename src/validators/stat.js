@@ -1,7 +1,7 @@
-const { check, validationResult } = require("express-validator/check");
-const { auth, validate } = require("../utils/validations");
+const { check } = require("express-validator/check");
+const { auth, validate, hasAccess } = require("./validators");
 
-getConsumptionData = [auth];
+getConsumptionData = [auth, check("user_id").isInt(), validate, hasAccess];
 
 module.exports = {
   getConsumptionData

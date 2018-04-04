@@ -1,9 +1,9 @@
 const Stats = require("../models/Stats");
 
 function getConsumptionData(request, response) {
-  const { id } = request.user;
+  const { user_id } = request.query;
 
-  Stats.getConsumptionData(id)
+  Stats.getConsumptionData(user_id)
     .then(data => {
       response.json({ data });
     })

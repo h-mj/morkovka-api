@@ -2,10 +2,9 @@ const Meal = require("../models/Meal");
 const Food = require("../models/Food");
 
 function get(request, response) {
-  const { id } = request.user;
-  const { date } = request.query;
+  const { user_id, date } = request.query;
 
-  Meal.getAll(id, date)
+  Meal.getAll(user_id, date)
     .then(data => response.json({ data }))
     .catch(error => {
       console.error(error);
@@ -14,16 +13,17 @@ function get(request, response) {
 }
 
 function create(request, response) {
-  const { id } = request.user;
-  const { type, date } = request.body;
+  const { user_id, type, date } = request.body;
 
-  Meal.exists(type, id, date)
+  Meal.exists(type, user_id, date)
     .then(data => {
       if (data) {
         return response.error(409, "Conflict");
       }
 
-      return Meal.add(type, id, date).then(data => response.json({ data }));
+      return Meal.add(type, user_id, date).then(data =>
+        response.json({ data })
+      );
     })
     .catch(error => {
       console.log(error);
@@ -32,10 +32,9 @@ function create(request, response) {
 }
 
 function add(request, response) {
-  const { id } = request.user;
-  const { foodstuff_id, meal_id, quantity } = request.body;
+  const { user_id, foodstuff_id, meal_id, quantity } = request.body;
 
-  Meal.isOwner(meal_id, id)
+  Meal.isOwner(meal_id, user_id)
     .then(data => {
       if (!data) {
         return response.error(400, "Bad Request");
@@ -52,10 +51,9 @@ function add(request, response) {
 }
 
 function remove(request, response) {
-  const { id } = request.user;
-  const { food_id } = request.body;
+  const { user_id, food_id } = request.body;
 
-  Food.isOwner(food_id, id)
+  Food.isOwner(food_id, user_id)
     .then(data => {
       if (!data) {
         return response.error(400, "Bad Request");

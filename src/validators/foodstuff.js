@@ -1,7 +1,13 @@
 const { check, validationResult } = require("express-validator/check");
-const { auth, validate } = require("../utils/validations");
+const { auth, validate } = require("./validators");
 
-const find = [auth, check("query").isLength({ min: 1 }), validate];
+const find = [
+  auth,
+  check("query")
+    .trim()
+    .isLength({ min: 1 }),
+  validate
+];
 
 const create = [
   auth,

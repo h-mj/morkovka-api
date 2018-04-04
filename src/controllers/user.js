@@ -10,8 +10,10 @@ function createToken(data) {
   });
 }
 
-function get(request, response) {
-  User.getBy("id", request.user.id)
+function getMe(request, response) {
+  const { id } = request.user;
+
+  User.getBy("id", id)
     .then(data => {
       response.json({ data: { token: createToken(data), ...data } });
     })
@@ -68,9 +70,9 @@ function login(request, response) {
 }
 
 function getClients(request, response) {
-  const { id } = request.user;
+  const { user_id } = request.query;
 
-  User.getClients(id)
+  User.getClients(user_id)
     .then(data => response.json({ data }))
     .catch(error => {
       console.log(error);
@@ -79,7 +81,7 @@ function getClients(request, response) {
 }
 
 module.exports = {
-  get,
+  getMe,
   create,
   login,
   getClients
