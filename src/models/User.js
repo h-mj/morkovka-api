@@ -29,9 +29,9 @@ module.exports = {
     );
   },
 
-  add: (name, sex, date_of_birth, email, hash) => {
+  add: (name, sex, date_of_birth, email, hash, trainer_id) => {
     return one("SELECT * FROM add_user_f(${arguments:csv});", {
-      arguments: [name, sex, date_of_birth, email, hash]
+      arguments: [name, sex, date_of_birth, email, hash, trainer_id]
     });
   },
 

@@ -33,7 +33,7 @@ function create(request, response) {
       }
 
       return hash(password, 8)
-        .then(hash => User.add(name, sex, date_of_birth, email, hash))
+        .then(hash => User.add(name, sex, date_of_birth, email, hash, null))
         .then(data =>
           response.json({ data: { token: createToken(data), ...data } })
         );
