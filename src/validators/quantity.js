@@ -24,6 +24,14 @@ const remove = [
   hasAccess
 ];
 
+const getDayMeasurements = [
+  auth,
+  check("user_id").isInt(),
+  check("date").isBefore(),
+  validate,
+  hasAccess
+];
+
 const getMeasurements = [
   auth,
   check("user_id").isInt(),
@@ -45,6 +53,7 @@ module.exports = {
   get,
   create,
   remove,
+  getDayMeasurements,
   getMeasurements,
   createMeasurement
 };

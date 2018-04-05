@@ -29,6 +29,13 @@ module.exports = {
     });
   },
 
+  getDayMeasurements: (user_id, date) => {
+    return any("SELECT * FROM get_measurements_f(${user_id}, ${date});", {
+      user_id,
+      date
+    });
+  },
+
   getMeasurements: quantity_id => {
     return any(
       "SELECT * FROM measurements_t WHERE quantity_id = ${quantity_id} ORDER BY date ASC;",

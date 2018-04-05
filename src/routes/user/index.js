@@ -6,10 +6,12 @@ const validator = require("../../validators/user");
 
 const mealRoute = require("./meal");
 const quantityRoute = require("./quantity");
+const ratioRoute = require("./ratio");
 const statRoute = require("./stat");
 
 router.use(mealRoute);
 router.use(quantityRoute);
+router.use(ratioRoute);
 router.use(statRoute);
 
 router.get("/user/me", validator.getMe, controller.getMe);

@@ -49,6 +49,17 @@ function remove(request, response) {
     });
 }
 
+function getDayMeasurements(request, response) {
+  const { user_id, date } = request.query;
+
+  Quantity.getDayMeasurements(user_id, date)
+    .then(data => response.json({ data }))
+    .catch(error => {
+      console.log(error);
+      response.error(500, "Internal Server Error");
+    });
+}
+
 function getMeasurements(request, response) {
   const { user_id, quantity_id } = request.query;
 
@@ -91,6 +102,7 @@ module.exports = {
   get,
   create,
   remove,
+  getDayMeasurements,
   getMeasurements,
   createMeasurement
 };
