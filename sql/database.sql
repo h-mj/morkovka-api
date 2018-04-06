@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-04-06 13:24:54
+-- Started on 2018-04-06 16:18:08
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,7 +18,7 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 225 (class 1255 OID 16864)
+-- TOC entry 226 (class 1255 OID 16864)
 -- Name: add_default_quantities_f(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -46,7 +46,7 @@ $$;
 ALTER FUNCTION public.add_default_quantities_f() OWNER TO postgres;
 
 --
--- TOC entry 227 (class 1255 OID 16795)
+-- TOC entry 229 (class 1255 OID 16795)
 -- Name: add_food_f(integer, integer, real); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -195,7 +195,7 @@ $$;
 ALTER FUNCTION public.add_measurement_f(quantity_id_a integer, value_a real) OWNER TO postgres;
 
 --
--- TOC entry 235 (class 1255 OID 16965)
+-- TOC entry 236 (class 1255 OID 16965)
 -- Name: add_quantity_f(integer, character varying, character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -242,7 +242,7 @@ $$;
 ALTER FUNCTION public.add_ratio_f(user_id_a integer, delta_a smallint, carbs_a smallint, proteins_a smallint, fats_a smallint) OWNER TO postgres;
 
 --
--- TOC entry 223 (class 1255 OID 17001)
+-- TOC entry 224 (class 1255 OID 17001)
 -- Name: add_user_f(character varying, character, date, character varying, character, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -266,7 +266,7 @@ $$;
 ALTER FUNCTION public.add_user_f(name_a character varying, sex_a character, date_of_birth_a date, email_a character varying, hash_a character, trainer_id_a integer) OWNER TO postgres;
 
 --
--- TOC entry 234 (class 1255 OID 16758)
+-- TOC entry 235 (class 1255 OID 16758)
 -- Name: find_foodstuffs_f(character varying); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -287,40 +287,101 @@ $$;
 ALTER FUNCTION public.find_foodstuffs_f(query_a character varying) OWNER TO postgres;
 
 --
--- TOC entry 228 (class 1255 OID 16995)
--- Name: get_consumption_data_f(integer); Type: FUNCTION; Schema: public; Owner: postgres
+-- TOC entry 227 (class 1255 OID 25268)
+-- Name: get_consumption_stats_f(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.get_consumption_data_f(user_id_a integer) RETURNS TABLE(date date, calories real, carbs real, proteins real, fats real)
+CREATE FUNCTION public.get_consumption_stats_f(user_id_a integer) RETURNS TABLE(date date, consumed json, ratios json, measurements json)
     LANGUAGE plpgsql
     AS $$
-#variable_conflict use_column
-BEGIN
-	RETURN QUERY
-	SELECT
-											meals_t.date,
-											sum(foods_t.calories),
-											sum(foods_t.carbs),
-											sum(foods_t.proteins),
-											sum(foods_t.fats)
-	FROM
-											foods_t
-	JOIN
-											meals_t
-	ON
-											foods_t.meal_id = meals_t.id
-	WHERE
-											meals_t.user_id = user_id_a AND
-											meals_t.date > CURRENT_DATE - INTERVAL '28' DAY
-	GROUP BY
-											meals_t.date
-	ORDER BY
-											meals_t.date DESC;
-END;
+begin
+return query
+select
+  dates.date,
+  (
+    select row_to_json(d) from (
+    select
+      coalesce(sum(calories), 0) as calories,
+      coalesce(sum(carbs), 0) as carbs,
+      coalesce(sum(proteins), 0) as proteins,
+      coalesce(sum(fats), 0) as fats
+    from
+      meals_t
+    join
+      foods_t
+    on
+      foods_t.meal_id = meals_t.id
+    where
+      meals_t.date = dates.date and meals_t.user_id = user_id_a
+  ) d) as consumed,
+  (
+    select row_to_json(d) from (
+      select carbs, proteins, fats from get_ratios_f(user_id_a, dates.date)
+    ) d
+  ) as ratios,
+  (select row_to_json(d) from get_crucial_measurements_f(user_id_a, dates.date) d) as measurements
+from
+  (
+    select t::date as date from generate_series
+	  (
+      current_date - interval '28' day,
+      current_date,
+      '1 day'
+    ) t
+  ) dates;
+end;
 $$;
 
 
-ALTER FUNCTION public.get_consumption_data_f(user_id_a integer) OWNER TO postgres;
+ALTER FUNCTION public.get_consumption_stats_f(user_id_a integer) OWNER TO postgres;
+
+--
+-- TOC entry 223 (class 1255 OID 25266)
+-- Name: get_crucial_measurements_f(integer, date); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.get_crucial_measurements_f(user_id_a integer, date_a date) RETURNS TABLE(mass real, height real, activeness real)
+    LANGUAGE plpgsql
+    AS $$
+
+begin
+return query
+select
+  *
+from
+(
+select
+  max(t.mass) as mass,
+  max(t.height) as height,
+  max(t.activeness) as activeness
+from
+(
+  select distinct on (quantities_t.type)
+    (select value where type = 1) as mass,
+    (select value where type = 2) as height,
+    (select value where type = 3) as activeness
+  from
+    quantities_t
+  join
+    measurements_t
+  on
+    measurements_t.quantity_id = quantities_t.id
+  where
+    measurements_t.date <= date_a and
+    quantities_t.user_id = user_id_a and
+    quantities_t.type >= 1 and quantities_t.type <= 3
+  order by
+    quantities_t.type, date DESC
+) t
+) d
+where
+  d is not null;
+end;
+
+$$;
+
+
+ALTER FUNCTION public.get_crucial_measurements_f(user_id_a integer, date_a date) OWNER TO postgres;
 
 --
 -- TOC entry 215 (class 1255 OID 25259)
@@ -341,17 +402,8 @@ return query
     from
       get_meals_f(user_id_a, date_a) as d
   ), '[]'::json) as meals,
-  (select
-   	  row_to_json(d)
-    from
-   	  get_ratios_f(user_id_a, date_a) as d
-  ) as ratios,
-  coalesce((
-    select
-      array_to_json(array_agg(row_to_json(d)))
-    from
-      get_measurements_f(user_id_a, date_a) as d
-  ), '[]'::json) as measurements;
+  (select row_to_json(d) from get_ratios_f(user_id_a, date_a) as d) as ratios,
+  (select row_to_json(d) from get_crucial_measurements_f(user_id_a, date_a) as d) as measurements;
 end;
 
 $$;
@@ -392,56 +444,7 @@ $$;
 ALTER FUNCTION public.get_meals_f(user_id_a integer, date_a date) OWNER TO postgres;
 
 --
--- TOC entry 236 (class 1255 OID 25252)
--- Name: get_measurements_f(integer, date); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.get_measurements_f(user_id_a integer, date_a date) RETURNS TABLE(type smallint, value real)
-    LANGUAGE plpgsql
-    AS $$
-#variable_conflict use_column
-BEGIN
-	RETURN QUERY
-	SELECT
-		quantities_t.type,
-		measurements_s.value
-	FROM
-		quantities_t
-	JOIN
-		(
-			WITH summary AS (
-				SELECT
-					quantity_id,
-					value,
-					date,
-					ROW_NUMBER() OVER (PARTITION BY quantity_id ORDER BY date DESC) as row_number
-				FROM
-					measurements_t
-				WHERE
-					measurements_t.date <= date_a
-			)
-			SELECT
-				*
-			FROM
-				summary
-			WHERE row_number = 1
-		) measurements_s
-	ON
-		quantities_t.id = measurements_s.quantity_id
-	WHERE
-		quantities_t.user_id = user_id_a AND
-		quantities_t.type > 0 AND quantities_t.type <= 3
-	ORDER BY
-		quantities_t.id ASC;
-END;
-
-$$;
-
-
-ALTER FUNCTION public.get_measurements_f(user_id_a integer, date_a date) OWNER TO postgres;
-
---
--- TOC entry 231 (class 1255 OID 16987)
+-- TOC entry 232 (class 1255 OID 16987)
 -- Name: get_quantities_f(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -1097,7 +1100,7 @@ ALTER TABLE ONLY public.users_t
     ADD CONSTRAINT users_t_trainer_id_fkey FOREIGN KEY (trainer_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- Completed on 2018-04-06 13:24:54
+-- Completed on 2018-04-06 16:18:08
 
 --
 -- PostgreSQL database dump complete
