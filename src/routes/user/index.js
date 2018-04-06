@@ -8,11 +8,13 @@ const mealRoute = require("./meal");
 const quantityRoute = require("./quantity");
 const ratioRoute = require("./ratio");
 const statRoute = require("./stat");
+const dayRoute = require("./day");
 
 router.use(mealRoute);
 router.use(quantityRoute);
 router.use(ratioRoute);
 router.use(statRoute);
+router.use(dayRoute);
 
 router.get("/user/me", validator.getMe, controller.getMe);
 router.post("/user", validator.create, controller.create);
