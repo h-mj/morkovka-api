@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-04-06 16:18:08
+-- Started on 2018-04-07 10:58:04
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,7 +18,24 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- TOC entry 226 (class 1255 OID 16864)
+-- TOC entry 1 (class 3079 OID 12924)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2903 (class 0 OID 0)
+-- Dependencies: 1
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- TOC entry 227 (class 1255 OID 16864)
 -- Name: add_default_quantities_f(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -29,14 +46,14 @@ CREATE FUNCTION public.add_default_quantities_f() RETURNS trigger
 		(DEFAULT, NEW.id, '__MASS__', 'kg', 1),
 		(DEFAULT, NEW.id, '__HEIGHT__', 'cm', 2),
 		(DEFAULT, NEW.id, '__ACTIVENESS__', 'unit', 3),
-		(DEFAULT, NEW.id, '__CHEST_PERIMITER__', 'cm', 4),
-		(DEFAULT, NEW.id, '__WAIST_PERIMITER__', 'cm', 5),
-		(DEFAULT, NEW.id, '__THIGHS_PERIMITER__', 'cm', 6),
-		(DEFAULT, NEW.id, '__THIGH_PERIMITER__', 'cm', 7),
-		(DEFAULT, NEW.id, '__CALVE_PERIMITER__', 'cm', 8),
-		(DEFAULT, NEW.id, '__BICEPS_PERIMITER__', 'cm', 9),
-		(DEFAULT, NEW.id, '__FOREARM_PERIMITER__', 'cm', 10),
-		(DEFAULT, NEW.id, '__ANKLE_PERIMITER__', 'cm', 11);
+		(DEFAULT, NEW.id, '__CHEST_PERIMETER__', 'cm', 4),
+		(DEFAULT, NEW.id, '__WAIST_PERIMETER__', 'cm', 5),
+		(DEFAULT, NEW.id, '__THIGHS_PERIMETER__', 'cm', 6),
+		(DEFAULT, NEW.id, '__THIGH_PERIMETER__', 'cm', 7),
+		(DEFAULT, NEW.id, '__CALF_PERIMETER__', 'cm', 8),
+		(DEFAULT, NEW.id, '__BICEPS_PERIMETER__', 'cm', 9),
+		(DEFAULT, NEW.id, '__FOREARM_PERIMETER__', 'cm', 10),
+		(DEFAULT, NEW.id, '__ANKLE_PERIMETER__', 'cm', 11);
 	
 	RETURN NEW;
 END;
@@ -46,7 +63,7 @@ $$;
 ALTER FUNCTION public.add_default_quantities_f() OWNER TO postgres;
 
 --
--- TOC entry 229 (class 1255 OID 16795)
+-- TOC entry 230 (class 1255 OID 16795)
 -- Name: add_food_f(integer, integer, real); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -147,7 +164,7 @@ $$;
 ALTER FUNCTION public.add_foodstuff_f(quantity_a real, unit_a character, name_a character varying, calories_a real, carbs_a real, proteins_a real, fats_a real) OWNER TO postgres;
 
 --
--- TOC entry 222 (class 1255 OID 16934)
+-- TOC entry 223 (class 1255 OID 16934)
 -- Name: add_meal_f(smallint, integer, date); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -213,7 +230,7 @@ $$;
 ALTER FUNCTION public.add_quantity_f(user_id_a integer, name_a character varying, unit_a character) OWNER TO postgres;
 
 --
--- TOC entry 220 (class 1255 OID 25248)
+-- TOC entry 221 (class 1255 OID 25248)
 -- Name: add_ratio_f(integer, smallint, smallint, smallint, smallint); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -242,7 +259,7 @@ $$;
 ALTER FUNCTION public.add_ratio_f(user_id_a integer, delta_a smallint, carbs_a smallint, proteins_a smallint, fats_a smallint) OWNER TO postgres;
 
 --
--- TOC entry 224 (class 1255 OID 17001)
+-- TOC entry 225 (class 1255 OID 17001)
 -- Name: add_user_f(character varying, character, date, character varying, character, integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -287,14 +304,13 @@ $$;
 ALTER FUNCTION public.find_foodstuffs_f(query_a character varying) OWNER TO postgres;
 
 --
--- TOC entry 227 (class 1255 OID 25268)
+-- TOC entry 228 (class 1255 OID 25268)
 -- Name: get_consumption_stats_f(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
 CREATE FUNCTION public.get_consumption_stats_f(user_id_a integer) RETURNS TABLE(date date, consumed json, ratios json, measurements json)
     LANGUAGE plpgsql
-    AS $$
-begin
+    AS $$begin
 return query
 select
   dates.date,
@@ -316,7 +332,7 @@ select
   ) d) as consumed,
   (
     select row_to_json(d) from (
-      select carbs, proteins, fats from get_ratios_f(user_id_a, dates.date)
+      select delta, carbs, proteins, fats from get_ratios_f(user_id_a, dates.date)
     ) d
   ) as ratios,
   (select row_to_json(d) from get_crucial_measurements_f(user_id_a, dates.date) d) as measurements
@@ -336,7 +352,7 @@ $$;
 ALTER FUNCTION public.get_consumption_stats_f(user_id_a integer) OWNER TO postgres;
 
 --
--- TOC entry 223 (class 1255 OID 25266)
+-- TOC entry 224 (class 1255 OID 25266)
 -- Name: get_crucial_measurements_f(integer, date); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -412,7 +428,7 @@ $$;
 ALTER FUNCTION public.get_day_f(user_id_a integer, date_a date) OWNER TO postgres;
 
 --
--- TOC entry 218 (class 1255 OID 16935)
+-- TOC entry 219 (class 1255 OID 16935)
 -- Name: get_meals_f(integer, date); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -444,50 +460,41 @@ $$;
 ALTER FUNCTION public.get_meals_f(user_id_a integer, date_a date) OWNER TO postgres;
 
 --
--- TOC entry 232 (class 1255 OID 16987)
+-- TOC entry 217 (class 1255 OID 25272)
 -- Name: get_quantities_f(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.get_quantities_f(user_id_a integer) RETURNS TABLE(id integer, user_id integer, name character varying, unit character, type smallint, value real, update date)
+CREATE FUNCTION public.get_quantities_f(user_id_a integer) RETURNS TABLE(id integer, name character varying, unit character, type smallint, measurements json)
     LANGUAGE plpgsql
-    AS $$
-#variable_conflict use_column
-BEGIN
-	RETURN QUERY
-	SELECT
-		quantities_t.id,
-		quantities_t.user_id,
-		quantities_t.name,
-		quantities_t.unit,
-		quantities_t.type,
-		measurements_s.value,
-		measurements_s.date
-	FROM
-		quantities_t
-	LEFT JOIN
-		(
-			WITH summary AS (
-				SELECT
-					quantity_id,
-					value,
-					date,
-					ROW_NUMBER() OVER (PARTITION BY quantity_id ORDER BY date DESC) as row_number
-				FROM
-					measurements_t
-			)
-			SELECT
-				*
-			FROM
-				summary
-			WHERE row_number = 1
-		) measurements_s
-	ON
-		quantities_t.id = measurements_s.quantity_id
-	WHERE
-		quantities_t.user_id = user_id_a
-	ORDER BY
-		quantities_t.id ASC;
-END;
+    AS $$begin
+  return query
+  select
+  quantities_t.id,
+  quantities_t.name,
+  quantities_t.unit,
+  quantities_t.type,
+  coalesce((
+    select
+      array_to_json(array_agg(row_to_json(d)))
+    from
+      (
+        select
+          measurements_t.id,
+          measurements_t.value,
+          measurements_t.date
+        from
+          measurements_t
+        where
+          measurements_t.quantity_id = quantities_t.id
+        order by
+          measurements_t.date asc
+      ) as d
+  ), '[]'::json) as measurements
+from
+  quantities_t
+where
+  quantities_t.user_id = user_id_a;
+end;
 $$;
 
 
@@ -560,7 +567,7 @@ CREATE SEQUENCE public.foods_t_id_seq
 ALTER TABLE public.foods_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2902 (class 0 OID 0)
+-- TOC entry 2904 (class 0 OID 0)
 -- Dependencies: 205
 -- Name: foods_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -603,7 +610,7 @@ CREATE SEQUENCE public.foodstuff_t_id_seq
 ALTER TABLE public.foodstuff_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2903 (class 0 OID 0)
+-- TOC entry 2905 (class 0 OID 0)
 -- Dependencies: 199
 -- Name: foodstuff_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -643,7 +650,7 @@ CREATE SEQUENCE public.meals_t_id_seq
 ALTER TABLE public.meals_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2904 (class 0 OID 0)
+-- TOC entry 2906 (class 0 OID 0)
 -- Dependencies: 203
 -- Name: meals_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -683,7 +690,7 @@ CREATE SEQUENCE public.measurements_t_id_seq
 ALTER TABLE public.measurements_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2905 (class 0 OID 0)
+-- TOC entry 2907 (class 0 OID 0)
 -- Dependencies: 207
 -- Name: measurements_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -724,7 +731,7 @@ CREATE SEQUENCE public.quantities_t_id_seq
 ALTER TABLE public.quantities_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2906 (class 0 OID 0)
+-- TOC entry 2908 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: quantities_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -768,7 +775,7 @@ CREATE SEQUENCE public.ratios_t_id_seq
 ALTER TABLE public.ratios_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2907 (class 0 OID 0)
+-- TOC entry 2909 (class 0 OID 0)
 -- Dependencies: 209
 -- Name: ratios_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -812,7 +819,7 @@ CREATE SEQUENCE public.users_t_id_seq
 ALTER TABLE public.users_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2908 (class 0 OID 0)
+-- TOC entry 2910 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: users_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1100,7 +1107,7 @@ ALTER TABLE ONLY public.users_t
     ADD CONSTRAINT users_t_trainer_id_fkey FOREIGN KEY (trainer_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- Completed on 2018-04-06 16:18:08
+-- Completed on 2018-04-07 10:58:05
 
 --
 -- PostgreSQL database dump complete
