@@ -13,7 +13,7 @@ function createToken(data) {
 function getMe(request, response) {
   const { id } = request.user;
 
-  User.getBy("id", id)
+  User.get(id)
     .then(data => {
       response.json({ data: { token: createToken(data), ...data } });
     })
@@ -47,18 +47,20 @@ function create(request, response) {
 function login(request, response) {
   const { email, password } = request.body;
 
-  User.getHashByEmail(email)
+  User.getIdAndHashByEmail(email)
     .then(data => {
       if (!data) {
         return response.error(400, "Bad Request");
       }
 
-      return compare(password, data.hash).then(result => {
+      const { id, hash } = data;
+
+      return compare(password, hash).then(result => {
         if (!result) {
           return response.error(400, "Bad Request");
         }
 
-        return User.getByEmail(email).then(data =>
+        return User.get(id).then(data =>
           response.json({ data: { token: createToken(data), ...data } })
         );
       });

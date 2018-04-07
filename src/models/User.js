@@ -1,28 +1,15 @@
 const { any, one, oneOrNone } = require("../database");
 
 module.exports = {
-  getBy: (column, value) => {
-    return one("SELECT * FROM users_v WHERE ${column:name} = ${value};", {
-      column,
-      value
-    });
-  },
-
-  getById: user_id => {
-    return one("SELECT * FROM users_v WHERE id = ${user_id} LIMIT 1;", {
+  get: user_id => {
+    return one("SELECT * FROM get_user_f(${user_id});", {
       user_id
     });
   },
 
-  getByEmail: email => {
-    return one("SELECT * FROM users_v WHERE email = ${email} LIMIT 1;", {
-      email
-    });
-  },
-
-  getHashByEmail: email => {
+  getIdAndHashByEmail: email => {
     return oneOrNone(
-      "SELECT hash FROM users_t WHERE email = ${email} LIMIT 1;",
+      "SELECT id, hash FROM users_t WHERE email = ${email} LIMIT 1;",
       {
         email
       }
@@ -49,7 +36,7 @@ module.exports = {
   },
 
   getClients: user_id => {
-    return any("SELECT * FROM users_v WHERE users_v.trainer_id = ${user_id};", {
+    return any("SELECT * FROM get_clients_f(${user_id});", {
       user_id
     });
   }
