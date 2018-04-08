@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-04-08 19:14:10
+-- Started on 2018-04-08 20:59:11
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -16,6 +16,23 @@ SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
+
+--
+-- TOC entry 1 (class 3079 OID 12924)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2913 (class 0 OID 0)
+-- Dependencies: 1
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
 
 --
 -- TOC entry 227 (class 1255 OID 16864)
@@ -324,16 +341,20 @@ select
   (
     select row_to_json(d) from (
     select
-      coalesce(sum(calories), 0) as calories,
-      coalesce(sum(carbs), 0) as carbs,
-      coalesce(sum(proteins), 0) as proteins,
-      coalesce(sum(fats), 0) as fats
+      coalesce(sum(foodstuffs_t.calories * foods_t.quantity), 0) as calories,
+      coalesce(sum(foodstuffs_t.carbs * foods_t.quantity), 0) as carbs,
+      coalesce(sum(foodstuffs_t.proteins * foods_t.quantity), 0) as proteins,
+      coalesce(sum(foodstuffs_t.fats * foods_t.quantity), 0) as fats
     from
       meals_t
     join
       foods_t
     on
       foods_t.meal_id = meals_t.id
+    join
+      foodstuffs_t
+    on
+      foodstuffs_t.id = foods_t.foodstuff_id
     where
       meals_t.date = dates.date and meals_t.user_id = user_id_a
   ) d) as consumed,
@@ -437,8 +458,7 @@ ALTER FUNCTION public.get_day_f(user_id_a integer, date_a date) OWNER TO postgre
 
 CREATE FUNCTION public.get_meals_f(user_id_a integer, date_a date) RETURNS TABLE(id integer, type smallint, foods json)
     LANGUAGE plpgsql
-    AS $$
-begin
+    AS $$begin
   return query
   select
     meals_t.id,
@@ -467,7 +487,9 @@ begin
   from
     meals_t
   where
-    meals_t.user_id = user_id_a and meals_t.date = date_a;
+    meals_t.user_id = user_id_a and meals_t.date = date_a
+  order by
+    meals_t.type asc;
 end;
 $$;
 
@@ -533,6 +555,7 @@ BEGIN
 	FROM
 		ratios_t
 	WHERE
+    ratios_t.user_id = user_id_a and
 		ratios_t.date <= date_a
 	ORDER BY
 		ratios_t.date DESC
@@ -608,7 +631,7 @@ CREATE SEQUENCE public.foods_t_id_seq
 ALTER TABLE public.foods_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2912 (class 0 OID 0)
+-- TOC entry 2914 (class 0 OID 0)
 -- Dependencies: 210
 -- Name: foods_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -651,7 +674,7 @@ CREATE SEQUENCE public.foodstuff_t_id_seq
 ALTER TABLE public.foodstuff_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2913 (class 0 OID 0)
+-- TOC entry 2915 (class 0 OID 0)
 -- Dependencies: 199
 -- Name: foodstuff_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -691,7 +714,7 @@ CREATE SEQUENCE public.meals_t_id_seq
 ALTER TABLE public.meals_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2914 (class 0 OID 0)
+-- TOC entry 2916 (class 0 OID 0)
 -- Dependencies: 203
 -- Name: meals_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -731,7 +754,7 @@ CREATE SEQUENCE public.measurements_t_id_seq
 ALTER TABLE public.measurements_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2915 (class 0 OID 0)
+-- TOC entry 2917 (class 0 OID 0)
 -- Dependencies: 205
 -- Name: measurements_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -772,7 +795,7 @@ CREATE SEQUENCE public.quantities_t_id_seq
 ALTER TABLE public.quantities_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2916 (class 0 OID 0)
+-- TOC entry 2918 (class 0 OID 0)
 -- Dependencies: 201
 -- Name: quantities_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -816,7 +839,7 @@ CREATE SEQUENCE public.ratios_t_id_seq
 ALTER TABLE public.ratios_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2917 (class 0 OID 0)
+-- TOC entry 2919 (class 0 OID 0)
 -- Dependencies: 207
 -- Name: ratios_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -874,7 +897,7 @@ CREATE SEQUENCE public.users_t_id_seq
 ALTER TABLE public.users_t_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2918 (class 0 OID 0)
+-- TOC entry 2920 (class 0 OID 0)
 -- Dependencies: 196
 -- Name: users_t_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
@@ -1180,7 +1203,7 @@ ALTER TABLE ONLY public.users_t
     ADD CONSTRAINT users_t_trainer_id_fkey FOREIGN KEY (trainer_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- Completed on 2018-04-08 19:14:10
+-- Completed on 2018-04-08 20:59:11
 
 --
 -- PostgreSQL database dump complete
