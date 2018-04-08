@@ -1,38 +1,9 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const jwt = require("express-jwt");
-const { secret } = require("./config");
+const server = require("express")();
+const compression = require("compression")();
 
-const userRoute = require("./routes/user");
-const foodstuffRoute = require("./routes/foodstuff");
+const api = require("./api");
 
-const server = express();
-
-server.use(bodyParser.json());
-
-server.use((request, response, next) => {
-  response.error = (code, message, details) => {
-    return response.status(code).json({ error: { code, message, details } });
-  };
-
-  next();
-});
-
-server.use(jwt({ secret, credentialsRequired: false }));
-
-server.use((error, request, response, next) => {
-  if (error.name === "UnauthorizedError") {
-    return response.error(401, "Unauthorized");
-  }
-
-  next();
-});
-
-server.use(userRoute);
-server.use(foodstuffRoute);
-
-server.use((request, response, next) => {
-  return response.error(404, "Not Found");
-});
+server.use(compression);
+server.use(api);
 
 server.listen(3001);

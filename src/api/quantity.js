@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
-const controller = require("../../../controllers/quantity");
-const validator = require("../../../validators/quantity");
+const controller = require("../controllers/quantity");
+const validator = require("../validators/quantity");
 
 router.get("/user/quantities", validator.get, controller.get);
 router.post("/user/quantity", validator.create, controller.create);

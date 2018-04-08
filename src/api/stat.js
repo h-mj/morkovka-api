@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
-const controller = require("../../../controllers/stat");
-const validator = require("../../../validators/stat");
+const controller = require("../controllers/stat");
+const validator = require("../validators/stat");
 
 router.get(
   "/user/stats/consumption",
