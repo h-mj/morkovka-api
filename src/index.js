@@ -4,6 +4,6 @@ const compression = require("compression")();
 const api = require("./api");
 
 server.use(compression);
-server.use(api);
+server.use("/api", api);
 
 server.listen(3001);
