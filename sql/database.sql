@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-04-08 20:59:11
+-- Started on 2018-04-12 09:20:50
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -468,6 +468,7 @@ CREATE FUNCTION public.get_meals_f(user_id_a integer, date_a date) RETURNS TABLE
         select
           foods_t.id as id,
           foods_t.quantity as quantity,
+          foodstuffs_t.id as foodstuff_id,
           foodstuffs_t.unit as unit,
           foodstuffs_t.name as name,
           foodstuffs_t.calories * foods_t.quantity as calories,
@@ -530,7 +531,9 @@ CREATE FUNCTION public.get_quantities_f(user_id_a integer) RETURNS TABLE(id inte
 from
   quantities_t
 where
-  quantities_t.user_id = user_id_a;
+  quantities_t.user_id = user_id_a
+order by
+  quantities_t.id;
 end;
 $$;
 
@@ -1203,7 +1206,7 @@ ALTER TABLE ONLY public.users_t
     ADD CONSTRAINT users_t_trainer_id_fkey FOREIGN KEY (trainer_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- Completed on 2018-04-08 20:59:11
+-- Completed on 2018-04-12 09:20:51
 
 --
 -- PostgreSQL database dump complete
