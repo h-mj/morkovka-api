@@ -12,7 +12,7 @@ const find = [
 const create = [
   auth,
   check("quantity").isFloat({ gt: 0 }),
-  check("unit").isIn(["g", "tk", "ml"]),
+  check("unit").isIn(["g", "pc", "ml"]),
   check("name")
     .trim()
     .isLength({ min: 1 }),
