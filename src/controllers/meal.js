@@ -59,9 +59,7 @@ function remove(request, response) {
         return response.error(400, "Bad Request");
       }
 
-      return Food.delete(food_id).then(data => {
-        response.json({ data: true });
-      });
+      return Food.delete(food_id).then(data => response.json({ data: true }));
     })
     .catch(error => {
       console.log(error);

@@ -49,11 +49,20 @@ const createMeasurement = [
   hasAccess
 ];
 
+const deleteMeasurement = [
+  auth,
+  check("user_id").isInt(),
+  check("measurement_id").isInt(),
+  validate,
+  hasAccess
+];
+
 module.exports = {
   get,
   create,
   remove,
   getDayMeasurements,
   getMeasurements,
-  createMeasurement
+  createMeasurement,
+  deleteMeasurement
 };

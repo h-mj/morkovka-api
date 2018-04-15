@@ -98,11 +98,31 @@ function createMeasurement(request, response) {
     });
 }
 
+function deleteMeasurement(request, response) {
+  const { user_id, measurement_id } = request.body;
+
+  Quantity.isMeasurementOwner(measurement_id, user_id)
+    .then(data => {
+      if (!data) {
+        return response.error(400, "Bad Request");
+      }
+
+      return Quantity.deleteMeasurement(measurement_id).then(data =>
+        response.json({ data: true })
+      );
+    })
+    .catch(error => {
+      console.log(error);
+      response.error(500, "Internal Server Error");
+    });
+}
+
 module.exports = {
   get,
   create,
   remove,
   getDayMeasurements,
   getMeasurements,
-  createMeasurement
+  createMeasurement,
+  deleteMeasurement
 };

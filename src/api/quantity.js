@@ -25,4 +25,10 @@ router.post(
   controller.createMeasurement
 );
 
+router.delete(
+  "/user/quantity/measurement",
+  validator.deleteMeasurement,
+  controller.deleteMeasurement
+);
+
 module.exports = router;

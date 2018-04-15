@@ -14,6 +14,13 @@ module.exports = {
     );
   },
 
+  isMeasurementOwner: (measurement_id, user_id) => {
+    return oneOrNone(
+      "SELECT 1 FROM measurements_t, quantities_t WHERE measurements_t.id = ${measurement_id} AND measurements_t.quantity_id = quantities_t.id AND quantities_t.user_id = ${user_id} LIMIT 1;",
+      { measurement_id, user_id }
+    );
+  },
+
   add: (user_id, name, unit) => {
     return one("SELECT * FROM add_quantity_f(${user_id}, ${name}, ${unit});", {
       user_id,
@@ -40,6 +47,13 @@ module.exports = {
     return any(
       "SELECT * FROM measurements_t WHERE quantity_id = ${quantity_id} ORDER BY date ASC;",
       { quantity_id }
+    );
+  },
+
+  deleteMeasurement: measurement_id => {
+    return none(
+      "DELETE FROM measurements_t WHERE measurements_t.id = ${measurement_id};",
+      { measurement_id }
     );
   },
 
