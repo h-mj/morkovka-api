@@ -10,6 +10,7 @@ const create = [
     .isLength({ min: 1 }),
   check("sex").isIn(["f", "m"]),
   check("date_of_birth").isBefore(),
+  check("language").isIn(["ru", "ee"]),
   check("email")
     .trim()
     .isEmail()
