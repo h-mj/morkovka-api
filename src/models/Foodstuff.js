@@ -12,10 +12,32 @@ module.exports = {
     );
   },
 
-  add: (quantity, unit, name, calories, carbs, proteins, fats) => {
+  add: (
+    quantity,
+    unit,
+    name,
+    calories,
+    carbs,
+    proteins,
+    fats,
+    sugars,
+    salt,
+    saturates
+  ) => {
     return one(
-      "SELECT * FROM add_foodstuff_f(${quantity}, ${unit}, ${name}, ${calories}, ${carbs}, ${proteins}, ${fats});",
-      { quantity, unit, name, calories, carbs, proteins, fats }
+      "SELECT * FROM add_foodstuff_f(${quantity}, ${unit}, ${name}, ${calories}, ${carbs}, ${proteins}, ${fats}, ${sugars}, ${salt}, ${saturates});",
+      {
+        quantity,
+        unit,
+        name,
+        calories,
+        carbs,
+        proteins,
+        fats,
+        sugars,
+        salt,
+        saturates
+      }
     );
   }
 };

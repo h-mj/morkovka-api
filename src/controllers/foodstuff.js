@@ -12,15 +12,22 @@ function find(request, response) {
 }
 
 function create(request, response) {
-  const {
+  let {
     quantity,
     unit,
     name,
     calories,
     carbs,
     proteins,
-    fats
+    fats,
+    sugars,
+    salt,
+    saturates
   } = request.body;
+
+  sugars = sugars ? sugars : null;
+  salt = salt ? salt : null;
+  saturates = saturates ? saturates : null;
 
   Foodstuff.exists(unit, name)
     .then(data => {
@@ -35,7 +42,10 @@ function create(request, response) {
         calories,
         carbs,
         proteins,
-        fats
+        fats,
+        sugars,
+        salt,
+        saturates
       ).then(data => {
         response.json({ data });
       });

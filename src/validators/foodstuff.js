@@ -20,6 +20,15 @@ const create = [
   check("carbs").isFloat({ min: 0 }),
   check("proteins").isFloat({ min: 0 }),
   check("fats").isFloat({ min: 0 }),
+  check("sugars")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 }),
+  check("salt")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 }),
+  check("saturates")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 }),
   validate
 ];
 
