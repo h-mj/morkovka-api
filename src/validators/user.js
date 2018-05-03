@@ -30,9 +30,12 @@ const login = [
 
 const getClients = [auth, check("user_id").isInt(), validate, hasAccess];
 
+const generateCode = [auth, check("user_id").isInt(), validate, hasAccess];
+
 module.exports = {
   getMe,
   create,
   login,
-  getClients
+  getClients,
+  generateCode
 };

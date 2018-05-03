@@ -84,9 +84,29 @@ function getClients(request, response) {
     });
 }
 
+function generateCode(request, response) {
+  const { user_id } = request.body;
+
+  User.isTrainer(user_id)
+    .then(data => {
+      if (!data) {
+        return response.error(403, "Forbidden");
+      }
+
+      return User.generateCode(user_id).then(data =>
+        response.json({ data: data.code })
+      );
+    })
+    .catch(error => {
+      console.log(error);
+      response.error(500, "Internal Server Error");
+    });
+}
+
 module.exports = {
   getMe,
   create,
   login,
-  getClients
+  getClients,
+  generateCode
 };
