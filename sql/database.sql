@@ -5,7 +5,7 @@
 -- Dumped from database version 10.3
 -- Dumped by pg_dump version 10.3
 
--- Started on 2018-05-03 14:48:36
+-- Started on 2018-05-03 16:21:24
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -244,28 +244,50 @@ $$;
 ALTER FUNCTION public.add_ratio_f(user_id_a integer, delta_a smallint, carbs_a smallint, proteins_a smallint, fats_a smallint) OWNER TO postgres;
 
 --
--- TOC entry 249 (class 1255 OID 25687)
--- Name: add_user_f(character varying, character, date, character, character varying, character, integer); Type: FUNCTION; Schema: public; Owner: postgres
+-- TOC entry 266 (class 1255 OID 25892)
+-- Name: add_user_f(character varying, character, date, character, character varying, character, character); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.add_user_f(name_a character varying, sex_a character, date_of_birth_a date, language_a character, email_a character varying, hash_a character, trainer_id_a integer) RETURNS TABLE(id integer, name character varying, sex character, date_of_birth date, language character, email character varying, type smallint, trainer_id integer)
+CREATE FUNCTION public.add_user_f(name_a character varying, sex_a character, date_of_birth_a date, language_a character, email_a character varying, hash_a character, code_a character) RETURNS TABLE(id integer, name character varying, sex character, date_of_birth date, language character, email character varying, type smallint, trainer_id integer)
     LANGUAGE plpgsql
     AS $$
 #variable_conflict use_column
-BEGIN
-	RETURN QUERY
-	INSERT INTO
+declare
+  trainer_id_v integer;
+begin
+  select
+    registration_codes_t.user_id into trainer_id_v
+  from
+    registration_codes_t
+  where
+    registration_codes_t.code = code_a and
+    registration_codes_t.used = false and
+    extract(day from current_timestamp - registration_codes_t.timestamp) <= 2;
+
+  if trainer_id_v is null then
+    return;
+  end if;
+  
+  update
+    registration_codes_t
+  set
+    used = true
+  where
+    registration_codes_t.code = code_a;
+
+	return query
+	insert into
 		users_t
-	VALUES
-		(DEFAULT, name_a, sex_a, date_of_birth_a, language_a, email_a, hash_a, DEFAULT, trainer_id_a)
-	RETURNING
+	values
+		(default, name_a, sex_a, date_of_birth_a, language_a, email_a, hash_a, default, trainer_id_v)
+	returning
 		id, name, sex, date_of_birth, language, email, type, trainer_id;
 END;
 
 $$;
 
 
-ALTER FUNCTION public.add_user_f(name_a character varying, sex_a character, date_of_birth_a date, language_a character, email_a character varying, hash_a character, trainer_id_a integer) OWNER TO postgres;
+ALTER FUNCTION public.add_user_f(name_a character varying, sex_a character, date_of_birth_a date, language_a character, email_a character varying, hash_a character, code_a character) OWNER TO postgres;
 
 --
 -- TOC entry 236 (class 1255 OID 25688)
@@ -486,7 +508,7 @@ $$;
 ALTER FUNCTION public.get_crucial_measurements_f(user_id_a integer, date_a date) OWNER TO postgres;
 
 --
--- TOC entry 260 (class 1255 OID 25693)
+-- TOC entry 259 (class 1255 OID 25693)
 -- Name: get_day_f(integer, date); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -632,7 +654,7 @@ $$;
 ALTER FUNCTION public.get_ratios_f(user_id_a integer, date_a date) OWNER TO postgres;
 
 --
--- TOC entry 263 (class 1255 OID 25697)
+-- TOC entry 262 (class 1255 OID 25697)
 -- Name: get_user_f(integer); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
@@ -1256,7 +1278,7 @@ ALTER TABLE ONLY public.users_t
     ADD CONSTRAINT users_t_trainer_id_fkey FOREIGN KEY (trainer_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
--- Completed on 2018-05-03 14:48:36
+-- Completed on 2018-05-03 16:21:24
 
 --
 -- PostgreSQL database dump complete

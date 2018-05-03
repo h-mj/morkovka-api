@@ -24,7 +24,15 @@ function getMe(request, response) {
 }
 
 function create(request, response) {
-  const { name, sex, date_of_birth, language, email, password } = request.body;
+  const {
+    name,
+    sex,
+    date_of_birth,
+    language,
+    email,
+    password,
+    code
+  } = request.body;
 
   User.existsByEmail(email)
     .then(data => {
@@ -34,11 +42,17 @@ function create(request, response) {
 
       return hash(password, 8)
         .then(hash =>
-          User.add(name, sex, date_of_birth, language, email, hash, null)
+          User.add(name, sex, date_of_birth, language, email, hash, code)
         )
-        .then(data =>
-          response.json({ data: { token: createToken(data), ...data } })
-        );
+        .then(data => {
+          if (!data) {
+            return response.error(422, "Unprocessable Entity", {
+              invalid: "code"
+            });
+          }
+
+          return response.json({ data: { token: createToken(data), ...data } });
+        });
     })
     .catch(error => {
       console.log(error);

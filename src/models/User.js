@@ -16,9 +16,9 @@ module.exports = {
     );
   },
 
-  add: (name, sex, date_of_birth, language, email, hash, trainer_id) => {
-    return one("SELECT * FROM add_user_f(${arguments:csv});", {
-      arguments: [name, sex, date_of_birth, language, email, hash, trainer_id]
+  add: (name, sex, date_of_birth, language, email, hash, code) => {
+    return oneOrNone("SELECT * FROM add_user_f(${arguments:csv});", {
+      arguments: [name, sex, date_of_birth, language, email, hash, code]
     });
   },
 
