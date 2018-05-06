@@ -8,5 +8,6 @@ router.post("/user", validator.create, controller.create);
 router.post("/user/token", validator.login, controller.login);
 router.get("/user/clients", validator.getClients, controller.getClients);
 router.post("/user/client/code", validator.generateCode, controller.generateCode);
+router.post("/user/settings", () => {});
 
 module.exports = router;

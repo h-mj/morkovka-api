@@ -49,36 +49,6 @@ function remove(request, response) {
     });
 }
 
-function getDayMeasurements(request, response) {
-  const { user_id, date } = request.query;
-
-  Quantity.getDayMeasurements(user_id, date)
-    .then(data => response.json({ data }))
-    .catch(error => {
-      console.log(error);
-      response.error(500, "Internal Server Error");
-    });
-}
-
-function getMeasurements(request, response) {
-  const { user_id, quantity_id } = request.query;
-
-  Quantity.isOwner(quantity_id, user_id)
-    .then(data => {
-      if (!data) {
-        return response.error(400, "Bad Request");
-      }
-
-      return Quantity.getMeasurements(quantity_id).then(data =>
-        response.json({ data })
-      );
-    })
-    .catch(error => {
-      console.log(error);
-      response.error(500, "Internal Server Error");
-    });
-}
-
 function createMeasurement(request, response) {
   const { user_id, quantity_id, value } = request.body;
 
@@ -121,8 +91,6 @@ module.exports = {
   get,
   create,
   remove,
-  getDayMeasurements,
-  getMeasurements,
   createMeasurement,
   deleteMeasurement
 };

@@ -1,17 +1,6 @@
 const Meal = require("../models/Meal");
 const Food = require("../models/Food");
 
-function get(request, response) {
-  const { user_id, date } = request.query;
-
-  Meal.getAll(user_id, date)
-    .then(data => response.json({ data }))
-    .catch(error => {
-      console.error(error);
-      response.error(500, "Internal Server Error");
-    });
-}
-
 function create(request, response) {
   const { user_id, type, date } = request.body;
 
@@ -68,7 +57,6 @@ function remove(request, response) {
 }
 
 module.exports = {
-  get,
   create,
   add,
   remove

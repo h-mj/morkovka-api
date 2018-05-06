@@ -36,20 +36,6 @@ module.exports = {
     });
   },
 
-  getDayMeasurements: (user_id, date) => {
-    return any("SELECT * FROM get_measurements_f(${user_id}, ${date});", {
-      user_id,
-      date
-    });
-  },
-
-  getMeasurements: quantity_id => {
-    return any(
-      "SELECT * FROM measurements_t WHERE quantity_id = ${quantity_id} ORDER BY date ASC;",
-      { quantity_id }
-    );
-  },
-
   deleteMeasurement: measurement_id => {
     return none(
       "DELETE FROM measurements_t WHERE measurements_t.id = ${measurement_id};",

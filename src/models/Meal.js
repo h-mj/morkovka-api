@@ -1,13 +1,6 @@
 const { one, any, oneOrNone } = require("../database");
 
 module.exports = {
-  getAll: (user_id, date) => {
-    return any("SELECT * FROM get_meals_f(${user_id}, ${date});", {
-      user_id,
-      date
-    });
-  },
-
   add: (type, user_id, date) => {
     return one(
       "SELECT * FROM add_meal_f(${type}::smallint, ${user_id}, ${date});",

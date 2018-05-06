@@ -1,14 +1,6 @@
 const { check } = require("express-validator/check");
 const { auth, validate, hasAccess } = require("./validators");
 
-const get = [
-  auth,
-  check("user_id").isInt(),
-  check("date").isBefore(),
-  validate,
-  hasAccess
-];
-
 const create = [
   auth,
   check("user_id").isInt(),
@@ -37,7 +29,6 @@ const remove = [
 ];
 
 module.exports = {
-  get,
   create,
   add,
   remove
