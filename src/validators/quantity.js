@@ -28,7 +28,9 @@ const createMeasurement = [
   auth,
   check("user_id").isInt(),
   check("quantity_id").isInt(),
-  check("value").isFloat(),
+  check("value")
+    .customSanitizer(value => value.replace(",", "."))
+    .isFloat(),
   validate,
   hasAccess
 ];

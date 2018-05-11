@@ -60,6 +60,21 @@ function create(request, response) {
     });
 }
 
+function update(request, response) {
+  const { user_id, language, email, new_password, password } = request.body;
+}
+
+function remove(request, response) {
+  const { user_id } = request.body;
+
+  User.remove(user_id)
+    .then(data => response.json({ data: true }))
+    .catch(error => {
+      console.log(error);
+      response.error(500, "Internal Server Error");
+    });
+}
+
 function login(request, response) {
   const { email, password } = request.body;
 
@@ -120,6 +135,8 @@ function generateCode(request, response) {
 module.exports = {
   getMe,
   create,
+  update,
+  remove,
   login,
   getClients,
   generateCode

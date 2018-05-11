@@ -20,6 +20,24 @@ const create = [
   validate
 ];
 
+const update = [
+  auth,
+  check("user_id").isInt(),
+  check("language")
+    .isIn(["ru", "ee"])
+    .optional(),
+  check("email")
+    .trim()
+    .isEmail()
+    .normalizeEmail(),
+  check("new_password").isLength({ min: 8 }),
+  check("password").isLength({ gt: 0 }),
+  validate,
+  hasAccess
+];
+
+const remove = [auth, check("user_id").isInt(), validate, hasAccess];
+
 const login = [
   check("email")
     .trim()
@@ -36,6 +54,8 @@ const generateCode = [auth, check("user_id").isInt(), validate, hasAccess];
 module.exports = {
   getMe,
   create,
+  update,
+  remove,
   login,
   getClients,
   generateCode

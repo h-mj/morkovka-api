@@ -11,23 +11,36 @@ const find = [
 
 const create = [
   auth,
-  check("quantity").isFloat({ gt: 0 }),
+  check("quantity")
+    .customSanitizer(value => value.replace(",", "."))
+    .isFloat({ gt: 0 }),
   check("unit").isIn(["g", "pc", "ml"]),
   check("name")
     .trim()
     .isLength({ min: 1 }),
-  check("calories").isFloat({ min: 0 }),
-  check("carbs").isFloat({ min: 0 }),
-  check("proteins").isFloat({ min: 0 }),
-  check("fats").isFloat({ min: 0 }),
+  check("calories")
+    .customSanitizer(value => value.replace(",", "."))
+    .isFloat({ min: 0 }),
+  check("carbs")
+    .customSanitizer(value => value.replace(",", "."))
+    .isFloat({ min: 0 }),
+  check("proteins")
+    .customSanitizer(value => value.replace(",", "."))
+    .isFloat({ min: 0 }),
+  check("fats")
+    .customSanitizer(value => value.replace(",", "."))
+    .isFloat({ min: 0 }),
   check("sugars")
     .optional({ checkFalsy: true })
+    .customSanitizer(value => value.replace(",", "."))
     .isFloat({ min: 0 }),
   check("salt")
     .optional({ checkFalsy: true })
+    .customSanitizer(value => value.replace(",", "."))
     .isFloat({ min: 0 }),
   check("saturates")
     .optional({ checkFalsy: true })
+    .customSanitizer(value => value.replace(",", "."))
     .isFloat({ min: 0 }),
   validate
 ];

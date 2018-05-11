@@ -1,4 +1,4 @@
-const { any, one, oneOrNone } = require("../database");
+const { any, none, one, oneOrNone } = require("../database");
 
 module.exports = {
   get: user_id => {
@@ -20,6 +20,10 @@ module.exports = {
     return oneOrNone("SELECT * FROM add_user_f(${arguments:csv});", {
       arguments: [name, sex, date_of_birth, language, email, hash, code]
     });
+  },
+
+  remove: user_id => {
+    return none("DELETE FROM users_t WHERE id = ${user_id};", { user_id });
   },
 
   existsByEmail: email => {

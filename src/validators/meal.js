@@ -15,7 +15,9 @@ const add = [
   check("user_id").isInt(),
   check("foodstuff_id").isInt(),
   check("meal_id").isInt(),
-  check("quantity").isFloat({ gt: 0 }),
+  check("quantity")
+    .customSanitizer(value => value.replace(",", "."))
+    .isFloat({ gt: 0 }),
   validate,
   hasAccess
 ];
