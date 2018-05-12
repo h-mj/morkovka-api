@@ -66,9 +66,7 @@ function update(request, response) {
   User.getIdAndHashByEmail(email)
     .then(data => {
       if (data && data.id !== user_id) {
-        return response.error(422, "Unprocessable Entity", {
-          invalid: "email"
-        });
+        return response.error(409, "Conflict");
       }
 
       return User.getHashById(user_id).then(data => {
