@@ -61,7 +61,40 @@ function create(request, response) {
 }
 
 function update(request, response) {
-  const { user_id, language, email, new_password, password } = request.body;
+  const { user_id, language, email, password, new_password } = request.body;
+
+  User.getIdAndHashByEmail(email)
+    .then(data => {
+      if (data && data.id !== user_id) {
+        return response.error(422, "Unprocessable Entity", {
+          invalid: "email"
+        });
+      }
+
+      return User.getHashById(user_id).then(data => {
+        if (!data) {
+          return response.error(400, "Bad Request");
+        }
+
+        const passwordHash = data.hash;
+
+        return compare(password, passwordHash).then(result => {
+          if (!result) {
+            return response.error(400, "Bad Request");
+          }
+
+          return new Promise((resolve, reject) => {
+            resolve(new_password ? hash(new_password, 8) : null);
+          })
+            .then(hash => User.update(user_id, language, email, hash))
+            .then(data => response.json({ data: true }));
+        });
+      });
+    })
+    .catch(error => {
+      console.log(error);
+      response.error(500, "Internal Server Error");
+    });
 }
 
 function remove(request, response) {

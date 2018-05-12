@@ -16,10 +16,30 @@ module.exports = {
     );
   },
 
+  getHashById: id => {
+    return oneOrNone("SELECT hash FROM users_t WHERE id = ${id} LIMIT 1;", {
+      id
+    });
+  },
+
   add: (name, sex, date_of_birth, language, email, hash, code) => {
     return oneOrNone("SELECT * FROM add_user_f(${arguments:csv});", {
       arguments: [name, sex, date_of_birth, language, email, hash, code]
     });
+  },
+
+  update: (user_id, language, email, hash) => {
+    if (hash) {
+      return none(
+        "UPDATE users_t SET language=${language}, email=${email}, hash=${hash} WHERE id = ${user_id} ;",
+        { user_id, language, email, hash }
+      );
+    }
+
+    return none(
+      "UPDATE users_t SET language=${language}, email=${email} WHERE id = ${user_id};",
+      { user_id, language, email }
+    );
   },
 
   remove: user_id => {

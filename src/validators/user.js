@@ -15,7 +15,7 @@ const create = [
     .trim()
     .isEmail()
     .normalizeEmail(),
-  check("password").isLength({ min: 8 }),
+  check("password").isLength({ gt: 0 }),
   check("code").isLength({ min: 16, max: 16 }),
   validate
 ];
@@ -24,14 +24,19 @@ const update = [
   auth,
   check("user_id").isInt(),
   check("language")
-    .isIn(["ru", "ee"])
-    .optional(),
+    .optional({ checkFalsy: true })
+    .isIn(["ru", "ee"]),
   check("email")
+    .optional({ checkFalsy: true })
     .trim()
     .isEmail()
     .normalizeEmail(),
-  check("new_password").isLength({ min: 8 }),
-  check("password").isLength({ gt: 0 }),
+  check("new_password")
+    .optional({ checkFalsy: true })
+    .isLength({ gt: 0 }),
+  check("password")
+    .optional({ checkFalsy: true })
+    .isLength({ gt: 0 }),
   validate,
   hasAccess
 ];
