@@ -15,7 +15,7 @@ const create = [
     .trim()
     .isEmail()
     .normalizeEmail(),
-  check("password").isLength({ gt: 0 }),
+  check("password").isLength({ min: 1 }),
   check("code").isLength({ min: 16, max: 16 }),
   validate
 ];
