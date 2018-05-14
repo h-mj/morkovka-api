@@ -61,6 +61,7 @@ function create(request, response) {
 }
 
 function update(request, response) {
+  const { id } = request.user;
   const { user_id, language, email, password, new_password } = request.body;
 
   User.getIdAndHashByEmail(email)
@@ -69,7 +70,7 @@ function update(request, response) {
         return response.error(409, "Conflict");
       }
 
-      return User.getHashById(user_id).then(data => {
+      return User.getHashById(id).then(data => {
         if (!data) {
           return response.error(400, "Bad Request");
         }
@@ -96,10 +97,30 @@ function update(request, response) {
 }
 
 function remove(request, response) {
-  const { user_id } = request.body;
+  const { id } = request.user;
+  const { user_id, password } = request.body;
 
-  User.remove(user_id)
-    .then(data => response.json({ data: true }))
+  User.getHashById(id)
+    .then(data => {
+      if (!data) {
+        return response.error(400, "Bad Request");
+      }
+
+      const passwordHash = data.hash;
+
+      return compare(password, passwordHash).then(result => {
+        if (!result) {
+          return response.error(400, "Bad Request");
+        }
+
+        return User.remove(user_id)
+          .then(data => response.json({ data: true }))
+          .catch(error => {
+            console.log(error);
+            response.error(500, "Internal Server Error");
+          });
+      });
+    })
     .catch(error => {
       console.log(error);
       response.error(500, "Internal Server Error");

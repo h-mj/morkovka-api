@@ -1,5 +1,5 @@
 module.exports = {
-  secret: "SECRETX",
+  secret: "CHANGEME",
   database: {
     user: "postgres",
     host: "localhost",

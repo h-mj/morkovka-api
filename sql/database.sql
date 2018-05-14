@@ -1269,7 +1269,7 @@ ALTER TABLE ONLY public.ratios_t
 --
 
 ALTER TABLE ONLY public.registration_codes_t
-    ADD CONSTRAINT registration_codes_f_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users_t(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT registration_codes_f_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users_t(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 
 --

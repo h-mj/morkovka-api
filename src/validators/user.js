@@ -34,14 +34,18 @@ const update = [
   check("new_password")
     .optional({ checkFalsy: true })
     .isLength({ gt: 0 }),
-  check("password")
-    .optional({ checkFalsy: true })
-    .isLength({ gt: 0 }),
+  check("password").isLength({ gt: 0 }),
   validate,
   hasAccess
 ];
 
-const remove = [auth, check("user_id").isInt(), validate, hasAccess];
+const remove = [
+  auth,
+  check("user_id").isInt(),
+  check("password").isLength({ gt: 0 }),
+  validate,
+  hasAccess
+];
 
 const login = [
   check("email")
