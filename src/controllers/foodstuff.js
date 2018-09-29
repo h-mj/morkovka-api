@@ -1,4 +1,5 @@
 const Foodstuff = require("../models/Foodstuff");
+const User = require("../models/User")
 
 function find(request, response) {
   Foodstuff.find(request.query.query)
@@ -56,7 +57,26 @@ function create(request, response) {
     });
 }
 
+function remove(request, response) {
+  const { id } = request.user;
+  const { foodstuff_id } = request.body;
+
+  User.isTrainer(id, null).then(data => {
+    if (!data) {
+      return response.error(403, "Forbidden");
+    }
+
+    return Foodstuff.remove(foodstuff_id)
+      .then(_ => response.json({ data: true }))
+  })
+    .catch(error => {
+      console.log(error);
+      response.error(500, "Internal Server Error");
+    });
+}
+
 module.exports = {
   find,
-  create
+  create,
+  remove
 };

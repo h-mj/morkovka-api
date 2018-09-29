@@ -45,7 +45,14 @@ const create = [
   validate
 ];
 
+const remove = [
+  auth,
+  check("foodstuff_id").isInt(),
+  validate
+];
+
 module.exports = {
   find,
-  create
+  create,
+  remove
 };

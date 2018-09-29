@@ -1,4 +1,4 @@
-const { one, any, oneOrNone } = require("../database");
+const { one, any, none, oneOrNone } = require("../database");
 
 module.exports = {
   find: query => {
@@ -39,5 +39,9 @@ module.exports = {
         saturates
       }
     );
-  }
+  },
+
+  remove: foodstuff_id => {
+    return none("DELETE FROM foodstuffs_t WHERE id = ${foodstuff_id};", { foodstuff_id });
+  },
 };
